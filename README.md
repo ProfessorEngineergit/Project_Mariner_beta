@@ -1,12 +1,10 @@
-# Bahrian Novotny My Universe
-Hi, I’m Bahrian Novotny — a 15-year-old high school student with a deep fascination for science, technology, and the endless possibilities they open up.
-From exploring the mechanics of the universe to experimenting with creative coding and engineering, I’m constantly looking for new ways to learn, build, and share ideas.
-This website grew out of that passion. For over a year, I had planned to build a portfolio site — but I wanted something different. Something exciting. Something interactive.
-Welcome to my universe.
+# Bahrian Novotny My Universe — Beta Edition
 
-# Project Mariner: How This Site Was Born
+Welcome to the **Beta Edition** of *My Universe* — a living, experimental space where new features are designed, tested, and refined before they make it to the main site.
 
-It all began with a simple HTML prototype. Instead of the ship you see now, there was a pyramid you could steer in the most basic way using a joystick, along with some very early camera rotation controls.
-About a week later, I had refined both the design and the functionality. I realized that by limiting the controls, the site would feel more polished — so I made the camera snap back to a fixed position and only allowed permanent zoom adjustments.
-Around that time, I replaced the pyramid with the USS Enterprise-D and introduced a loading screen.
-Next came the planets. The tricky part was making sure they stayed as far apart from each other as possible. Finally, I implemented a feature where, when the ship enters a planet’s inner sphere to analyze it, the planet stops moving — and as soon as the ship leaves, it accelerates to catch up to the position it would have reached had it never stopped.
+This Beta is open to everyone — developers, designers, testers, or anyone with an idea to contribute. I am happy for your ideas and code improvement, that I will try to implement as soon as possible.
+
+From experimental navigation systems to new planet interactions, enhanced animations, and prototype content modules — this is the playground where the future of *My Universe* is forged. It’s a place to break things, fix them, and make them better.
+
+If you’re ready to explore, test, and help build the next chapter of *My Universe*, then welcome aboard.
+This isn’t just my universe anymore — it’s ours.
