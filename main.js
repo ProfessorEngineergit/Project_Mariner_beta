@@ -237,11 +237,8 @@ function createPlanetTexture(color) {
   const canvas = document.createElement('canvas');
   canvas.width = 128; canvas.height = 128;
   const context = canvas.getContext('2d');
-
-  // HSL/HSLA als Strings
   context.fillStyle = `hsl(${color}, 70%, 50%)`;
   context.fillRect(0, 0, 128, 128);
-
   for (let i = 0; i < 3000; i++) {
     const x = Math.random() * 128; const y = Math.random() * 128; const r = Math.random() * 1.5;
     context.beginPath(); context.arc(x, y, r, 0, Math.PI * 2);
@@ -431,7 +428,8 @@ loader.load(
     loadingProgress = 1;
     progressBar.style.width = '100%';
     loadingPercentage.textContent = '100%';
-    loadingTitle.textContent = 'Drop out of Warp-Speed';
+    // Text gemäß Wunsch
+    loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
     ship = gltf.scene;
@@ -444,14 +442,22 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
+    // Beim Klick: Kamera SEITLICH "loslassen" und SOFORT steuerbar machen
     loadingScreen.addEventListener('click', () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
-      appState = 'intro';
+
+      // Seitliche Startperspektive (90°), dann normale Federlogik übernimmt
+      cameraPivot.rotation.y = Math.PI / 2;
+      appState = 'playing';
+
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
+
+      // Quick Warp etwas verzögert einblenden (wie vorher nach Intro)
+      setTimeout(() => { quickWarpBtn.classList.remove('hidden'); }, 1000);
     }, { once: true });
 
     buildWarpList();
@@ -757,27 +763,18 @@ function animate() {
     }
   }
 
-  // Intro → danach Quick Warp-Button zeigen
-  if (appState === 'intro') {
-    cameraPivot.rotation.y = THREE.MathUtils.lerp(cameraPivot.rotation.y, 0, 0.02);
-    if (Math.abs(cameraPivot.rotation.y) < 0.01) {
-      cameraPivot.rotation.y = 0;
-      appState = 'playing';
-      quickWarpBtn.classList.remove('hidden');
+  // Normale Kameralogik (Feder + Begrenzung) — sofort aktiv, kein blockierender Intro-State
+  if (ship) {
+    if (cameraFingerId === null && !isDraggingMouse) {
+      cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
+      cameraPivot.rotation.y = THREE.MathUtils.lerp(cameraPivot.rotation.y, 0, LERP_FACTOR);
     }
-  } else if (appState === 'playing') {
-    if (ship) {
-      if (cameraFingerId === null && !isDraggingMouse) {
-        cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
-        cameraPivot.rotation.y = THREE.MathUtils.lerp(cameraPivot.rotation.y, 0, LERP_FACTOR);
-      }
-      if (cameraHolder.rotation.x > ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x - ROTATION_LIMIT) * SPRING_STIFFNESS;
-      else if (cameraHolder.rotation.x < -ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x + ROTATION_LIMIT) * SPRING_STIFFNESS;
-      if (cameraPivot.rotation.y > ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y - ROTATION_LIMIT) * SPRING_STIFFNESS;
-      else if (cameraPivot.rotation.y < -ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y + ROTATION_LIMIT) * SPRING_STIFFNESS;
-      cameraHolder.rotation.x += cameraVelocity.x;
-      cameraPivot.rotation.y += cameraVelocity.y;
-    }
+    if (cameraHolder.rotation.x > ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x - ROTATION_LIMIT) * SPRING_STIFFNESS;
+    else if (cameraHolder.rotation.x < -ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x + ROTATION_LIMIT) * SPRING_STIFFNESS;
+    if (cameraPivot.rotation.y > ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y - ROTATION_LIMIT) * SPRING_STIFFNESS;
+    else if (cameraPivot.rotation.y < -ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y + ROTATION_LIMIT) * SPRING_STIFFNESS;
+    cameraHolder.rotation.x += cameraVelocity.x;
+    cameraPivot.rotation.y += cameraVelocity.y;
   }
 
   cameraVelocity.multiplyScalar(0.90);
@@ -813,3 +810,18 @@ window.addEventListener('resize', () => {
   loadingCamera.aspect = window.innerWidth / window.innerHeight;
   loadingCamera.updateProjectionMatrix();
 });
+
+/* ===== Maus-Spotlight (positionsabhängiger Hover) für Buttons ===== */
+function addPointerGlow(el) {
+  if (!el) return;
+  el.addEventListener('mousemove', (e) => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--glow-x', `${e.clientX - r.left}px`);
+    el.style.setProperty('--glow-y', `${e.clientY - r.top}px`);
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.setProperty('--glow-x', `-120px`);
+    el.style.setProperty('--glow-y', `-120px`);
+  });
+}
+[analyzeButton, muteButton, quickWarpBtn, warpCloseBtn, warpHereBtn, closeAnalysisButton].forEach(addPointerGlow);
