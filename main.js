@@ -419,9 +419,61 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
-// GLB-Pfad
+// Neuer Repo-/Pages-Pfad für die GLB:
 const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
+// ======= GYRO-STEERING VARS =======
+let gyroControlActive = false;
+const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt (beim ersten Event)
+const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
+const GYRO_FORWARD_FACTOR = 0.015; // ~0.3 bei ~20° Kipp (vor/zurück)
+const GYRO_TURN_FACTOR    = 0.003; // ~0.06 bei ~20° Kipp (links/rechts)
+const GYRO_MAX_FORWARD    = 0.35;  // clamp für Vortrieb
+const GYRO_MAX_TURN       = 0.06;  // clamp für Rotation
+const GYRO_SMOOTHING      = 0.12;  // LERP-Faktor
+
+function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function onDeviceOrientation(e) {
+  // e.beta: -180..180 (vor/zurück), e.gamma: -90..90 (links/rechts)
+  const beta = (typeof e.beta === 'number') ? e.beta : 0;
+  const gamma = (typeof e.gamma === 'number') ? e.gamma : 0;
+
+  // Nullpunkt beim ersten validen Event setzen
+  if (gyroBaseline.beta === null || gyroBaseline.gamma === null) {
+    gyroBaseline.beta = beta;
+    gyroBaseline.gamma = gamma;
+  }
+
+  const dBeta = beta - gyroBaseline.beta;   // vor/zurück
+  const dGamma = gamma - gyroBaseline.gamma; // links/rechts
+
+  const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
+  const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
+
+  gyroInput.forward = lerp(gyroInput.forward, targetForward, GYRO_SMOOTHING);
+  gyroInput.turn    = lerp(gyroInput.turn,    targetTurn,    GYRO_SMOOTHING);
+}
+
+async function enableGyro() {
+  if (gyroControlActive) return;
+  try {
+    // iOS (ab 13+) braucht explizite Erlaubnis nach User-Geste
+    if (typeof DeviceOrientationEvent !== 'undefined'
+        && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const state = await DeviceOrientationEvent.requestPermission();
+      if (state !== 'granted') return;
+    }
+    window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
+    gyroControlActive = true;
+  } catch (err) {
+    // still graceful if something fails
+    console.warn('Gyro not available or permission denied:', err);
+  }
+}
+
+// ======= LOAD MODEL =======
 loader.load(
   modelURL,
   (gltf) => {
@@ -431,23 +483,31 @@ loader.load(
     loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
-    ship = gltf.scene;
-    ship.rotation.y = Math.PI;
-    mainScene.add(ship);
-    ship.position.set(0, 0, 30);
+    // Scene setup
+    let shipLoaded = gltf.scene;
+    shipLoaded.rotation.y = Math.PI;
+    mainScene.add(shipLoaded);
+    shipLoaded.position.set(0, 0, 30);
+    ship = shipLoaded;
+
     forcefield = createForcefield(5.1);
     ship.add(forcefield);
     ship.add(cameraPivot); cameraPivot.add(cameraHolder); cameraHolder.add(camera);
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Start: seitlich "loslassen" und sofort normale Kameralogik aktiv
-    loadingScreen.addEventListener('click', () => {
+    // Beim Tap: Audio starten, Kamera seitlich "loslassen", Gyro aktivieren
+    loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
+
       cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
+
+      // Gyro versuchen zu aktivieren (User-Geste vorhanden)
+      if (window.isSecureContext) { enableGyro(); }
+
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
@@ -504,8 +564,8 @@ nipplejs.create({
 })
 .on('move', (evt, data) => {
   if (data.vector && ship) {
-    joystickMove.forward = data.vector.y * 0.3;
-    joystickMove.turn = -data.vector.x * 0.05;
+    joystickMove.forward = data.vector.y * 0.3;     // vor/zurück
+    joystickMove.turn = -data.vector.x * 0.05;      // links/rechts
   }
 })
 .on('end', () => joystickMove = { forward: 0, turn: 0 });
@@ -708,11 +768,12 @@ function animate() {
   });
 
   if (ship) {
-    // 3x schneller per Tastatur
+    // Eingaben kombinieren: Keyboard + Joystick + Gyro
     const keyForward = (keyboard['w'] ? 0.3 : 0) + (keyboard['s'] ? -0.3 : 0);
-    const keyTurn = (keyboard['a'] ? 0.05 : 0) + (keyboard['d'] ? -0.05 : 0);
-    const finalForward = joystickMove.forward + keyForward;
-    const finalTurn = joystickMove.turn + keyTurn;
+    const keyTurn    = (keyboard['a'] ? 0.05 : 0) + (keyboard['d'] ? -0.05 : 0);
+
+    const finalForward = joystickMove.forward + keyForward + (gyroControlActive ? gyroInput.forward : 0);
+    const finalTurn    = joystickMove.turn    + keyTurn    + (gyroControlActive ? gyroInput.turn    : 0);
 
     const shipRadius = 5;
     const previousPosition = ship.position.clone();
@@ -743,7 +804,7 @@ function animate() {
     planets.forEach(p => p.isFrozen = (activeObject === p.mesh));
     currentlyAnalyzedObject = activeObject;
 
-    // Analyze-Button sichtbar + Glow toggeln
+    // Analyze-Button anzeigen/ausblenden + Glow toggeln
     if (activeObject && !isAnalyzeButtonVisible) {
       analyzeButton.classList.add('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = true;
@@ -753,7 +814,7 @@ function animate() {
     }
   }
 
-  // Normale Kameralogik (Feder + Begrenzung)
+  // Normalisierte Kameralogik
   if (ship) {
     if (cameraFingerId === null && !isDraggingMouse) {
       cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
