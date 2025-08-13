@@ -419,7 +419,7 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
-// Neuer Repo-/Pages-Pfad für die GLB:
+// GLB-Pfad
 const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
 loader.load(
@@ -428,7 +428,6 @@ loader.load(
     loadingProgress = 1;
     progressBar.style.width = '100%';
     loadingPercentage.textContent = '100%';
-    // Text gemäß Wunsch
     loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
@@ -442,21 +441,16 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Klick: Kamera SEITLICH "loslassen" und SOFORT steuerbar machen
+    // Start: seitlich "loslassen" und sofort normale Kameralogik aktiv
     loadingScreen.addEventListener('click', () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
-
-      // Seitliche Startperspektive (90°), dann normale Federlogik übernimmt
-      cameraPivot.rotation.y = Math.PI / 2;
+      cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
-
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
-
-      // Quick Warp etwas verzögert einblenden (wie vorher nach Intro)
       setTimeout(() => { quickWarpBtn.classList.remove('hidden'); }, 1000);
     }, { once: true });
 
@@ -510,7 +504,6 @@ nipplejs.create({
 })
 .on('move', (evt, data) => {
   if (data.vector && ship) {
-    // 3x schneller vor/zurück
     joystickMove.forward = data.vector.y * 0.3;
     joystickMove.turn = -data.vector.x * 0.05;
   }
@@ -603,7 +596,6 @@ analyzeButton.addEventListener('click', () => {
       `<p>Für <em>${objName}</em> ist noch kein Text/Bild hinterlegt. Trage Inhalte im <code>OBJECT_CONTENT</code>-Block ein.</p>`;
   }
 
-  // Optional: Glow entfernen, sobald das Fenster geöffnet wird
   analyzeButton.classList.remove('btn-outline-glow');
 
   analysisWindow.classList.add('visible');
@@ -751,19 +743,17 @@ function animate() {
     planets.forEach(p => p.isFrozen = (activeObject === p.mesh));
     currentlyAnalyzedObject = activeObject;
 
-    // === Analyze-Button anzeigen/ausblenden + Glow toggeln ===
+    // Analyze-Button sichtbar + Glow toggeln
     if (activeObject && !isAnalyzeButtonVisible) {
-      analyzeButton.classList.add('ui-visible');
-      analyzeButton.classList.add('btn-outline-glow');
+      analyzeButton.classList.add('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = true;
     } else if (!activeObject && isAnalyzeButtonVisible) {
-      analyzeButton.classList.remove('ui-visible');
-      analyzeButton.classList.remove('btn-outline-glow');
+      analyzeButton.classList.remove('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = false;
     }
   }
 
-  // Normale Kameralogik (Feder + Begrenzung) — sofort aktiv, kein blockierender Intro-State
+  // Normale Kameralogik (Feder + Begrenzung)
   if (ship) {
     if (cameraFingerId === null && !isDraggingMouse) {
       cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
@@ -811,17 +801,40 @@ window.addEventListener('resize', () => {
   loadingCamera.updateProjectionMatrix();
 });
 
-/* ===== Maus-Spotlight (positionsabhängiger Hover) für Buttons ===== */
+/* ===== Maus & Touch Spotlight mit stärkerem Touch-Hover ===== */
 function addPointerGlow(el) {
   if (!el) return;
-  el.addEventListener('mousemove', (e) => {
+
+  const setPos = (clientX, clientY) => {
     const r = el.getBoundingClientRect();
-    el.style.setProperty('--glow-x', `${e.clientX - r.left}px`);
-    el.style.setProperty('--glow-y', `${e.clientY - r.top}px`);
-  });
-  el.addEventListener('mouseleave', () => {
-    el.style.setProperty('--glow-x', `-120px`);
-    el.style.setProperty('--glow-y', `-120px`);
-  });
+    el.style.setProperty('--glow-x', `${clientX - r.left}px`);
+    el.style.setProperty('--glow-y', `${clientY - r.top}px`);
+  };
+
+  el.addEventListener('pointerenter', (e) => {
+    setPos(e.clientX, e.clientY);
+    el.classList.add('hover-active');
+    if (e.pointerType !== 'mouse') el.classList.add('touch-hover');
+  }, { passive: true });
+
+  el.addEventListener('pointermove', (e) => {
+    setPos(e.clientX, e.clientY);
+    if (e.pointerType !== 'mouse') el.classList.add('touch-hover', 'hover-active');
+  }, { passive: true });
+
+  el.addEventListener('pointerleave', () => {
+    el.classList.remove('hover-active', 'touch-hover');
+    el.style.setProperty('--glow-x', `-220px`);
+    el.style.setProperty('--glow-y', `-220px`);
+  }, { passive: true });
+
+  el.addEventListener('pointerup', () => {
+    el.classList.remove('touch-hover');
+  }, { passive: true });
+
+  el.addEventListener('pointercancel', () => {
+    el.classList.remove('hover-active', 'touch-hover');
+  }, { passive: true });
 }
+
 [analyzeButton, muteButton, quickWarpBtn, warpCloseBtn, warpHereBtn, closeAnalysisButton].forEach(addPointerGlow);
