@@ -406,7 +406,7 @@ Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target
 };
 // ===== ENDE INHALTE =====
 
-// States
+// ===== STATES =====
 let appState = 'loading';
 let isAnalyzeButtonVisible = false;
 let currentlyAnalyzedObject = null;
@@ -419,39 +419,33 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
-// Neuer Repo-/Pages-Pfad für die GLB:
+// GLB-Pfad
 const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
 // ======= GYRO-STEERING VARS =======
 let gyroControlActive = false;
-const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt (beim ersten Event)
-const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
-const GYRO_FORWARD_FACTOR = 0.015; // ~0.3 bei ~20° Kipp (vor/zurück)
-const GYRO_TURN_FACTOR    = 0.003; // ~0.06 bei ~20° Kipp (links/rechts)
-const GYRO_MAX_FORWARD    = 0.35;  // clamp für Vortrieb
-const GYRO_MAX_TURN       = 0.06;  // clamp für Rotation
-const GYRO_SMOOTHING      = 0.12;  // LERP-Faktor
+const gyroBaseline = { beta: null, gamma: null };
+const gyroInput = { forward: 0, turn: 0 };
+const GYRO_FORWARD_FACTOR = 0.015;
+const GYRO_TURN_FACTOR    = 0.003;
+const GYRO_MAX_FORWARD    = 0.35;
+const GYRO_MAX_TURN       = 0.06;
+const GYRO_SMOOTHING      = 0.12;
 
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
 
 function onDeviceOrientation(e) {
-  // e.beta: -180..180 (vor/zurück), e.gamma: -90..90 (links/rechts)
   const beta = (typeof e.beta === 'number') ? e.beta : 0;
   const gamma = (typeof e.gamma === 'number') ? e.gamma : 0;
-
-  // Nullpunkt beim ersten validen Event setzen
   if (gyroBaseline.beta === null || gyroBaseline.gamma === null) {
     gyroBaseline.beta = beta;
     gyroBaseline.gamma = gamma;
   }
-
-  const dBeta = beta - gyroBaseline.beta;   // vor/zurück
-  const dGamma = gamma - gyroBaseline.gamma; // links/rechts
-
+  const dBeta = beta - gyroBaseline.beta;
+  const dGamma = gamma - gyroBaseline.gamma;
   const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
   const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
-
   gyroInput.forward = lerp(gyroInput.forward, targetForward, GYRO_SMOOTHING);
   gyroInput.turn    = lerp(gyroInput.turn,    targetTurn,    GYRO_SMOOTHING);
 }
@@ -459,7 +453,6 @@ function onDeviceOrientation(e) {
 async function enableGyro() {
   if (gyroControlActive) return;
   try {
-    // iOS (ab 13+) braucht explizite Erlaubnis nach User-Geste
     if (typeof DeviceOrientationEvent !== 'undefined'
         && typeof DeviceOrientationEvent.requestPermission === 'function') {
       const state = await DeviceOrientationEvent.requestPermission();
@@ -468,12 +461,11 @@ async function enableGyro() {
     window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
     gyroControlActive = true;
   } catch (err) {
-    // still graceful if something fails
     console.warn('Gyro not available or permission denied:', err);
   }
 }
 
-// ======= LOAD MODEL =======
+// ===== MODEL LOAD =====
 loader.load(
   modelURL,
   (gltf) => {
@@ -483,12 +475,10 @@ loader.load(
     loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
-    // Scene setup
-    let shipLoaded = gltf.scene;
-    shipLoaded.rotation.y = Math.PI;
-    mainScene.add(shipLoaded);
-    shipLoaded.position.set(0, 0, 30);
-    ship = shipLoaded;
+    ship = gltf.scene;
+    ship.rotation.y = Math.PI;
+    mainScene.add(ship);
+    ship.position.set(0, 0, 30);
 
     forcefield = createForcefield(5.1);
     ship.add(forcefield);
@@ -496,18 +486,14 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Tap: Audio starten, Kamera seitlich "loslassen", Gyro aktivieren
+    // Start: seitlich "loslassen", sofort normale Kameralogik
     loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
-
       cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
-
-      // Gyro versuchen zu aktivieren (User-Geste vorhanden)
       if (window.isSecureContext) { enableGyro(); }
-
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
@@ -527,7 +513,7 @@ loader.load(
   (error) => { console.error('Ladefehler:', error); loadingTitle.textContent = 'Fehler!'; }
 );
 
-// Steuerung
+// ===== STEUERUNG =====
 const keyboard = {};
 let joystickMove = { forward: 0, turn: 0 };
 const ROTATION_LIMIT = Math.PI * 0.33;
@@ -717,23 +703,75 @@ warpHereBtn.addEventListener('click', () => {
   closeWarpOverlay();
 });
 
+// ===== Quick Warp: Helfer + robustes performWarp =====
+function getPlanetWorldPos(planet) {
+  const v = new THREE.Vector3();
+  planet.mesh.getWorldPosition(v);
+  return v;
+}
+
+function resetAfterWarp() {
+  // Inputs & States neutralisieren
+  joystickMove = { forward: 0, turn: 0 };
+  for (const k in keyboard) keyboard[k] = false;
+
+  cameraFingerId = null;
+  isDraggingMouse = false;
+  initialPinchDistance = 0;
+
+  cameraVelocity.set(0, 0);
+  zoomVelocity = 0;
+
+  // Gyro neutral halten
+  if (typeof gyroInput !== 'undefined') {
+    gyroInput.forward = 0;
+    gyroInput.turn = 0;
+  }
+
+  // Analyze-UI zurücksetzen
+  currentlyAnalyzedObject = null;
+  if (isAnalyzeButtonVisible) {
+    analyzeButton.classList.remove('ui-visible', 'btn-outline-glow');
+    isAnalyzeButtonVisible = false;
+  }
+
+  // Kamera neutral (Federlogik übernimmt)
+  cameraPivot.rotation.y = 0;
+  cameraHolder.rotation.x = 0;
+}
+
 function performWarp(targetId) {
+  if (!ship) return;
+
   if (targetId === 'blackhole') {
-    const target = new THREE.Vector3(0, 0, 0);
-    ship.position.copy(target.clone().add(new THREE.Vector3(0, 0, 30)));
-    ship.lookAt(target);
+    // Sichere Distanz außerhalb des Pacing-Circles
+    const center = new THREE.Vector3(0, 0, 0);
+    const circleR = pacingCircle.geometry.parameters.radius * pacingCircle.scale.x;
+    const safeDist = Math.max(circleR + 6, 18);
+    const fromDir = ship.position.clone().sub(center).normalize();
+    if (fromDir.lengthSq() === 0) fromDir.set(0, 0, 1);
+    const pos = center.clone().add(fromDir.multiplyScalar(safeDist));
+    ship.position.copy(pos);
+    ship.lookAt(center);
   } else {
     const idx = parseInt(targetId.split('-')[1], 10);
     const p = planets[idx];
-    const worldPos = new THREE.Vector3();
-    p.mesh.getWorldPosition(worldPos);
+    if (!p) { resetAfterWarp(); return; }
 
-    const dir = new THREE.Vector3().subVectors(ship.position, worldPos).normalize();
-    if (dir.lengthSq() === 0) dir.set(0, 0, 1);
-    ship.position.copy(worldPos.clone().add(dir.multiplyScalar(12 + p.mesh.geometry.parameters.radius)));
+    const worldPos = getPlanetWorldPos(p);
+    const boundaryR = p.boundaryCircle.geometry.parameters.radius * p.boundaryCircle.scale.x;
+    const safeDist = Math.max(boundaryR + 4, 12); // knapp außerhalb des Analyse-Rings
+
+    // Radialrichtung vom Zentrum der Szene zum Planeten
+    const radial = worldPos.clone().normalize();
+    if (radial.lengthSq() === 0) radial.set(0, 0, 1);
+
+    const shipPos = worldPos.clone().add(radial.multiplyScalar(safeDist));
+    ship.position.copy(shipPos);
     ship.lookAt(worldPos);
   }
-  cameraPivot.rotation.y = 0;
+
+  resetAfterWarp(); // danach wieder frei steuerbar
 }
 
 // ===== Animation =====
@@ -804,7 +842,7 @@ function animate() {
     planets.forEach(p => p.isFrozen = (activeObject === p.mesh));
     currentlyAnalyzedObject = activeObject;
 
-    // Analyze-Button anzeigen/ausblenden + Glow toggeln
+    // Analyze-Button sichtbar + Glow toggeln
     if (activeObject && !isAnalyzeButtonVisible) {
       analyzeButton.classList.add('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = true;
@@ -814,7 +852,7 @@ function animate() {
     }
   }
 
-  // Normalisierte Kameralogik
+  // Kameralogik (Feder + Begrenzung)
   if (ship) {
     if (cameraFingerId === null && !isDraggingMouse) {
       cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
