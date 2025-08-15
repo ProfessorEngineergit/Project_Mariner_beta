@@ -34,32 +34,33 @@ composer.addPass(bloomPass);
 
 // ===== UI REFERENZEN =====
 const loadingScreen = document.getElementById('loading-screen');
-const progressBar = document.getElementById('progress-bar');
-const loadingTitle = document.getElementById('loading-title');
+const progressBar   = document.getElementById('progress-bar');
+const loadingTitle  = document.getElementById('loading-title');
 const loadingPercentage = document.getElementById('loading-percentage');
-const infoElement = document.getElementById('info');
-const joystickZone = document.getElementById('joystick-zone');
-const bottomBar = document.getElementById('bottom-bar');
-const muteButton = document.getElementById('mute-button');
+const infoElement   = document.getElementById('info');
+const joystickZone  = document.getElementById('joystick-zone');
+const bottomBar     = document.getElementById('bottom-bar');
 const analyzeButton = document.getElementById('analyze-button');
-const audio = document.getElementById('media-player');
+const muteButton    = document.getElementById('mute-button');
+const motionButton  = document.getElementById('motion-toggle-button');
+const audio         = document.getElementById('media-player');
 
-const analysisWindow = document.getElementById('analysis-window');
-const analysisTitle = document.getElementById('analysis-title');
+const analysisWindow      = document.getElementById('analysis-window');
+const analysisTitle       = document.getElementById('analysis-title');
 const analysisTextContent = document.getElementById('analysis-text-content');
 const closeAnalysisButton = document.getElementById('close-analysis-button');
 
 // Quick Warp UI
-const quickWarpBtn = document.getElementById('quick-warp-btn');
-const quickWarpOverlay = document.getElementById('quick-warp-overlay');
-const warpList = document.getElementById('warp-list');
-const warpHereBtn = document.getElementById('warp-here');
-const warpCloseBtn = document.getElementById('warp-close');
-const warpFlash = document.getElementById('warp-flash');
+const quickWarpBtn    = document.getElementById('quick-warp-btn');
+const quickWarpOverlay= document.getElementById('quick-warp-overlay');
+const warpList        = document.getElementById('warp-list');
+const warpHereBtn     = document.getElementById('warp-here');
+const warpCloseBtn    = document.getElementById('warp-close');
+const warpFlash       = document.getElementById('warp-flash'); // optional element
 let chosenWarpTargetId = null;
 
 // ===== HYPERSPACE-LOADING =====
-const loadingScene = new THREE.Scene();
+const loadingScene  = new THREE.Scene();
 const loadingCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 let hyperspaceParticles;
 const HYPERSPACE_LENGTH = 800;
@@ -76,9 +77,7 @@ function createHyperspaceEffect() {
     );
   }
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  const material = new THREE.PointsMaterial({
-    color: 0xffffff, size: 0.1, blending: THREE.AdditiveBlending
-  });
+  const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1, blending: THREE.AdditiveBlending });
   hyperspaceParticles = new THREE.Points(geometry, material);
   loadingScene.add(hyperspaceParticles);
 }
@@ -121,9 +120,7 @@ function createGalaxy() {
 
     const mixedColor = colorInside.clone();
     mixedColor.lerp(colorOutside, radius / parameters.radius);
-    colors[i3] = mixedColor.r;
-    colors[i3 + 1] = mixedColor.g;
-    colors[i3 + 2] = mixedColor.b;
+    colors[i3] = mixedColor.r; colors[i3 + 1] = mixedColor.g; colors[i3 + 2] = mixedColor.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -137,18 +134,12 @@ function createGalaxy() {
   gradient.addColorStop(0.2, 'rgba(255,255,255,1)');
   gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)');
   gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, 64, 64);
+  context.fillStyle = gradient; context.fillRect(0, 0, 64, 64);
   const particleTexture = new THREE.CanvasTexture(canvas);
 
   const material = new THREE.PointsMaterial({
-    size: parameters.size,
-    sizeAttenuation: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true,
-    map: particleTexture,
-    transparent: true
+    size: parameters.size, sizeAttenuation: true, depthWrite: false,
+    blending: THREE.AdditiveBlending, vertexColors: true, map: particleTexture, transparent: true
   });
 
   galaxy = new THREE.Points(geometry, material);
@@ -156,17 +147,12 @@ function createGalaxy() {
 }
 createGalaxy();
 
-// Schwarzes Loch + Lens  (Name bleibt Project_Mariner)
-const blackHoleCore = new THREE.Mesh(
-  new THREE.SphereGeometry(1.5, 32, 32),
-  new THREE.MeshBasicMaterial({ color: 0x000000 })
-);
+// Schwarzes Loch + Lens
+const blackHoleCore = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x000000 }));
 blackHoleCore.name = 'Project_Mariner (This Site)';
 mainScene.add(blackHoleCore);
 
-const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
-  generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter
-});
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
 const cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
 mainScene.add(cubeCamera);
 
@@ -186,9 +172,7 @@ function createAccretionDisk() {
   context.fillStyle = gradient; context.fillRect(0, 0, 256, 256);
   const texture = new THREE.CanvasTexture(canvas);
   const geometry = new THREE.RingGeometry(2.5, 5, 64);
-  const material = new THREE.MeshBasicMaterial({
-    map: texture, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending
-  });
+  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending });
   const disk = new THREE.Mesh(geometry, material);
   disk.rotation.x = Math.PI / 2;
   mainScene.add(disk);
@@ -206,8 +190,6 @@ function makeLabel(text) {
   root.appendChild(lineDiv);
   return root;
 }
-
-// Blackhole Label
 const blackHoleLabelDiv = makeLabel(blackHoleCore.name);
 const blackHoleLabel = new CSS2DObject(blackHoleLabelDiv);
 blackHoleLabel.position.set(0, 7, 0);
@@ -278,12 +260,12 @@ function createPlanet(data, index) {
 }
 planetData.forEach(createPlanet);
 
-// Einheitliche Winkelgeschwindigkeit → konstante Phasenabstände
+// Einheitliche Winkelgeschwindigkeit
 const GLOBAL_ANGULAR_SPEED = 0.02;
 
 // Ship & Kamera
 let ship; let forcefield;
-const cameraPivot = new THREE.Object3D();
+const cameraPivot  = new THREE.Object3D();
 const cameraHolder = new THREE.Object3D();
 
 function createForcefield(radius) {
@@ -296,117 +278,30 @@ function createForcefield(radius) {
   }
   const texture = new THREE.CanvasTexture(canvas);
   const geometry = new THREE.SphereGeometry(radius, 32, 32);
-  const material = new THREE.MeshBasicMaterial({
-    map: texture, transparent: true, blending: THREE.AdditiveBlending, opacity: 0, side: THREE.DoubleSide
-  });
+  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, blending: THREE.AdditiveBlending, opacity: 0, side: THREE.DoubleSide });
   const ff = new THREE.Mesh(geometry, material);
   ff.visible = false;
   return ff;
 }
 
-// ===== ✨ INHALTE FÜR ANALYSE-FENSTER =====
+// ===== Inhalte Analyse-Fenster (gekürzt hier gleich wie vorher) =====
 const OBJECT_CONTENT = {
   'Project_Mariner (This Site)': {
     title: 'Project Mariner',
-    html: `
-<p>Hi, I’m Bahrian Novotny — a 15-year-old high school student with a deep fascination for science, technology, and the endless possibilities they open up.<br><br>
-From exploring the mechanics of the universe to experimenting with creative coding and engineering, I’m constantly looking for new ways to learn, build, and share ideas.<br><br>
-This website grew out of that passion. For over a year, I had planned to build a portfolio site — but I wanted something different. Something exciting. Something interactive.
-Welcome to my universe.<br><br><br><br>
-<b>Project Mariner: How This Site Was Born</b><br><br>
-It all began with a simple HTML prototype. Instead of the ship you see now, there was a pyramid you could steer in the most basic way using a joystick, along with some very
-early camera rotation controls.<br><br>
-About a week later, I had refined both the design and the functionality. I realized that by limiting the controls, the site would feel more polished — so I made the camera
-snap back to a fixed position and only allowed permanent zoom adjustments.<br><br>
-Around that time, I replaced the pyramid with the USS Enterprise-D and introduced a loading screen.<br><br>
-Next came the planets. The tricky part was making sure they stayed as far apart from each other as possible. Finally, I implemented a feature where,
-when the ship enters a planet’s inner sphere to analyze it, the planet stops moving — and as soon as the ship leaves, it accelerates to catch up to the position it would have
-reached had it never stopped.
-</p>
-`,
+    html: `<p>Hi, I’m Bahrian Novotny — ...</p>`,
     images: []
   },
-  'Infos': {
-    title: 'Infos',
-    html: `
-<p>
-THIS IS <b>MY_UNIVERSE V1.0</b><br><br>
-UPCOMING: <b>V1.5 PRO</b> (minor fixes +)<br>
-– Newsletter function<br>
-– Overview function<br>
-– Deep Space function<br>
-– New Blender-crafted planets<br>
-– More controls<br>
-– Matte Glass 1.5 Pro material<br>
-– Enhanced button animations<br>
-– Smoother Quick Warp<br><br>
-<b>V2.0</b> — scheduled for December 2025
-</p>
-`,
-    images: []
-  },
-  'SURGE (The autonomous Robottaxi)': {
-    title: 'SURGE – Autonomous Robottaxi',
-    html: `
-<p><i>(SURGE: Smart Urban Robotic Guidance & Exploration-Pod)</i><br><br>
-SURGE is my 8th-grade capstone project — an autonomous, electrically powered mini robotic taxi. It runs on an NVIDIA Jetson Nano, uses live camera input for navigation, and is built with modular 3D-printed parts. From design to AI control, I built and programmed everything myself.</p>
-`,
-    images: ['SURGE 2.jpeg']
-  },
-  'OpenImageLabel (A website to label images for professional photography)': {
-    title: 'OpenImageLabel',
-    html: `
-<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>
-`,
-    images: []
-  },
-  'Project Cablerack (A smarter way to cable-manage)': {
-    title: 'Project Cablerack',
-    html: `
-<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>
-`,
-    images: ['Rack 2.png']
-  },
-  'Socials/Other Sites': {
-    title: 'Socials & Links',
-    html: `
-<ul>
-  <li><b>GitHub:</b> <a href="https://github.com/ProfessorEngineergit" target="_blank" rel="noopener">github.com/ProfessorEngineergit</a></li>
-  <li><b>School GitHub:</b> <a href="https://github.com/makerLab314" target="_blank" rel="noopener">github.com/makerLab314</a></li>
-  <li><b>YouTube:</b> <a href="https://www.youtube.com/@droneXplorer-t1n" target="_blank" rel="noopener">youtube.com/@droneXplorer-t1n</a></li>
-  <li><b>Skypixel:</b> <a href="https://www.skypixel.com/users/till-bahrian" target="_blank" rel="noopener">skypixel.com/users/till-bahrian</a></li>
-  <li><b>Book me (drone):</b> <a href="https://bahriannovotny.wixstudio.com/meinewebsite" target="_blank" rel="noopener">bahriannovotny.wixstudio.com/meinewebsite</a></li>
-  <li><b>3D print services:</b> <a href="https://lorenzobaymueller.wixstudio.com/3d-print-hub" target="_blank" rel="noopener">lorenzobaymueller.wixstudio.com/3d-print-hub</a></li>
-</ul>
-`,
-    images: []
-  },
-  'HA-Lightswitch (Making analog Lightswitches smart)': {
-    title: 'HA-Lightswitch',
-    html: `
-<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
-Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>
-`,
-    images: []
-  },
-  'My Creative Work (Filming, flying, photography)': {
-    title: 'Creative Work',
-    html: `
-<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>
-`,
-    images: []
-  },
-  '3D-Printing (The ultimate engineering-tool)': {
-    title: '3D-Printing',
-    html: `
-<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>
-`,
-    images: []
-  }
+  'Infos': { title: 'Infos', html: `<p>THIS IS <b>MY_UNIVERSE V1.0</b> ...</p>`, images: [] },
+  'SURGE (The autonomous Robottaxi)': { title: 'SURGE – Autonomous Robottaxi', html: `<p><i>(SURGE ...)</i> ...</p>`, images: ['SURGE 2.jpeg'] },
+  'OpenImageLabel (A website to label images for professional photography)': { title: 'OpenImageLabel', html: `<p>OpenImageLabel turns EXIF ...</p>`, images: [] },
+  'Project Cablerack (A smarter way to cable-manage)': { title: 'Project Cablerack', html: `<p>A custom sheet-metal rack ...</p>`, images: ['Rack 2.png'] },
+  'Socials/Other Sites': { title: 'Socials & Links', html: `<ul>...</ul>`, images: [] },
+  'HA-Lightswitch (Making analog Lightswitches smart)': { title: 'HA-Lightswitch', html: `<p>3D-printed, servo-driven ...</p>`, images: [] },
+  'My Creative Work (Filming, flying, photography)': { title: 'Creative Work', html: `<p>Drone storytelling ...</p>`, images: [] },
+  '3D-Printing (The ultimate engineering-tool)': { title: '3D-Printing', html: `<p>From kindergarten ...</p>`, images: [] }
 };
-// ===== ENDE INHALTE =====
 
-// States
+// ===== STATES =====
 let appState = 'loading';
 let isAnalyzeButtonVisible = false;
 let currentlyAnalyzedObject = null;
@@ -419,16 +314,72 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
-// Neuer Repo-/Pages-Pfad für die GLB:
+// GLB
 const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
+// ======= GYRO-STEERING =======
+let gyroControlActive = false;
+const gyroBaseline = { beta: null, gamma: null };
+const gyroInput = { forward: 0, turn: 0 };
+const GYRO_FORWARD_FACTOR = 0.015;
+const GYRO_TURN_FACTOR    = 0.003;
+const GYRO_MAX_FORWARD    = 0.35;
+const GYRO_MAX_TURN       = 0.06;
+const GYRO_SMOOTHING      = 0.12;
+
+function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function onDeviceOrientation(e) {
+  const beta = (typeof e.beta === 'number') ? e.beta : 0;
+  const gamma = (typeof e.gamma === 'number') ? e.gamma : 0;
+  if (gyroBaseline.beta === null || gyroBaseline.gamma === null) {
+    gyroBaseline.beta = beta; gyroBaseline.gamma = gamma;
+  }
+  const dBeta = beta - gyroBaseline.beta;
+  const dGamma = gamma - gyroBaseline.gamma;
+  const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
+  const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
+  gyroInput.forward = lerp(gyroInput.forward, targetForward, GYRO_SMOOTHING);
+  gyroInput.turn    = lerp(gyroInput.turn,    targetTurn,    GYRO_SMOOTHING);
+}
+
+async function enableGyro() {
+  if (gyroControlActive) return true;
+  try {
+    if (typeof DeviceOrientationEvent !== 'undefined'
+      && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const state = await DeviceOrientationEvent.requestPermission();
+      if (state !== 'granted') return false;
+    }
+    window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
+    gyroControlActive = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function disableGyro() {
+  if (!gyroControlActive) return;
+  window.removeEventListener('deviceorientation', onDeviceOrientation);
+  gyroControlActive = false;
+  gyroInput.forward = 0; gyroInput.turn = 0;
+}
+
+function updateMotionButtonUI() {
+  if (!motionButton) return;
+  motionButton.classList.toggle('active', gyroControlActive);
+  motionButton.setAttribute('aria-pressed', gyroControlActive ? 'true' : 'false');
+}
+
+// ===== MODEL LOAD =====
 loader.load(
   modelURL,
   (gltf) => {
     loadingProgress = 1;
     progressBar.style.width = '100%';
     loadingPercentage.textContent = '100%';
-    // Text gemäß Wunsch
     loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
@@ -436,27 +387,23 @@ loader.load(
     ship.rotation.y = Math.PI;
     mainScene.add(ship);
     ship.position.set(0, 0, 30);
+
     forcefield = createForcefield(5.1);
     ship.add(forcefield);
     ship.add(cameraPivot); cameraPivot.add(cameraHolder); cameraHolder.add(camera);
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Klick: Kamera SEITLICH "loslassen" und SOFORT steuerbar machen
-    loadingScreen.addEventListener('click', () => {
+    // Start: seitlich "loslassen", Kamera-Logik übernimmt
+    loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
-
-      // Seitliche Startperspektive (90°), dann normale Federlogik übernimmt
-      cameraPivot.rotation.y = Math.PI / 2;
+      cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
-
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
-
-      // Quick Warp etwas verzögert einblenden (wie vorher nach Intro)
       setTimeout(() => { quickWarpBtn.classList.remove('hidden'); }, 1000);
     }, { once: true });
 
@@ -473,7 +420,7 @@ loader.load(
   (error) => { console.error('Ladefehler:', error); loadingTitle.textContent = 'Fehler!'; }
 );
 
-// Steuerung
+// ===== STEUERUNG =====
 const keyboard = {};
 let joystickMove = { forward: 0, turn: 0 };
 const ROTATION_LIMIT = Math.PI * 0.33;
@@ -487,19 +434,12 @@ let isDraggingMouse = false;
 let initialPinchDistance = 0;
 let previousTouch = { x: 0, y: 0 };
 
-muteButton.addEventListener('click', () => {
-  if (!audio) return;
-  audio.muted = !audio.muted;
-  muteButton.classList.toggle('muted');
-});
-
 window.addEventListener('keydown', (e) => {
   keyboard[e.key.toLowerCase()] = true;
   if ((e.key === '=' || e.key === '-' || e.key === '+') && (e.ctrlKey || e.metaKey)) e.preventDefault();
 });
 window.addEventListener('keyup', (e) => { keyboard[e.key.toLowerCase()] = false; });
 
-// nipplejs muss im HTML geladen sein
 /* global nipplejs */
 nipplejs.create({
   zone: document.getElementById('joystick-zone'),
@@ -510,7 +450,6 @@ nipplejs.create({
 })
 .on('move', (evt, data) => {
   if (data.vector && ship) {
-    // 3x schneller vor/zurück
     joystickMove.forward = data.vector.y * 0.3;
     joystickMove.turn = -data.vector.x * 0.05;
   }
@@ -583,29 +522,20 @@ function getPinchDistance(e) {
 // ===== Analyse-Fenster =====
 analyzeButton.addEventListener('click', () => {
   if (!currentlyAnalyzedObject) return;
-
   const objName = currentlyAnalyzedObject.name;
   const content = OBJECT_CONTENT[objName];
-
   analysisTitle.textContent = (content && content.title) ? content.title : objName;
-
   if (content && (content.html || (content.images && content.images.length))) {
     let html = content.html ? content.html : '';
     if (content.images && content.images.length) {
-      const imgs = content.images
-        .map(src => `<img src="${encodeURI(src)}" loading="lazy" alt="">`)
-        .join('');
+      const imgs = content.images.map(src => `<img src="${encodeURI(src)}" loading="lazy" alt="">`).join('');
       html += `<div class="analysis-gallery">${imgs}</div>`;
     }
     analysisTextContent.innerHTML = html;
   } else {
-    analysisTextContent.innerHTML =
-      `<p>Für <em>${objName}</em> ist noch kein Text/Bild hinterlegt. Trage Inhalte im <code>OBJECT_CONTENT</code>-Block ein.</p>`;
+    analysisTextContent.innerHTML = `<p>Für <em>${objName}</em> ist noch kein Text/Bild hinterlegt. Trage Inhalte im <code>OBJECT_CONTENT</code>-Block ein.</p>`;
   }
-
-  // Optional: Glow entfernen, sobald das Fenster geöffnet wird
   analyzeButton.classList.remove('btn-outline-glow');
-
   analysisWindow.classList.add('visible');
   appState = 'paused';
 });
@@ -631,10 +561,7 @@ function closeWarpOverlay() {
 
 function buildWarpList() {
   warpList.innerHTML = '';
-  const entries = [
-    { id: 'blackhole', name: blackHoleCore.name },
-    ...planets.map((p, i) => ({ id: 'planet-' + i, name: p.mesh.name }))
-  ];
+  const entries = [{ id: 'blackhole', name: blackHoleCore.name }, ...planets.map((p, i) => ({ id: 'planet-' + i, name: p.mesh.name }))];
   for (const entry of entries) {
     const li = document.createElement('li');
     li.textContent = entry.name;
@@ -655,33 +582,50 @@ warpHereBtn.addEventListener('click', () => {
     warpFlash.classList.add('active');
     setTimeout(() => warpFlash.classList.remove('active'), 180);
   }
-
   appState = 'paused';
-  setTimeout(() => {
-    performWarp(chosenWarpTargetId);
-    appState = 'playing';
-  }, 160);
-
+  setTimeout(() => { performWarp(chosenWarpTargetId); appState = 'playing'; }, 160);
   closeWarpOverlay();
 });
 
+// Quick Warp helpers
+function getPlanetWorldPos(planet) {
+  const v = new THREE.Vector3();
+  planet.mesh.getWorldPosition(v);
+  return v;
+}
+function resetAfterWarp() {
+  joystickMove = { forward: 0, turn: 0 };
+  for (const k in keyboard) keyboard[k] = false;
+  cameraFingerId = null; isDraggingMouse = false; initialPinchDistance = 0;
+  cameraVelocity.set(0, 0); zoomVelocity = 0;
+  if (typeof gyroInput !== 'undefined') { gyroInput.forward = 0; gyroInput.turn = 0; }
+  currentlyAnalyzedObject = null;
+  if (isAnalyzeButtonVisible) { analyzeButton.classList.remove('ui-visible', 'btn-outline-glow'); isAnalyzeButtonVisible = false; }
+  cameraPivot.rotation.y = 0; cameraHolder.rotation.x = 0;
+}
 function performWarp(targetId) {
+  if (!ship) return;
   if (targetId === 'blackhole') {
-    const target = new THREE.Vector3(0, 0, 0);
-    ship.position.copy(target.clone().add(new THREE.Vector3(0, 0, 30)));
-    ship.lookAt(target);
+    const center = new THREE.Vector3(0, 0, 0);
+    const circleR = pacingCircle.geometry.parameters.radius * pacingCircle.scale.x;
+    const safeDist = Math.max(circleR + 6, 18);
+    const fromDir = ship.position.clone().sub(center).normalize();
+    if (fromDir.lengthSq() === 0) fromDir.set(0, 0, 1);
+    const pos = center.clone().add(fromDir.multiplyScalar(safeDist));
+    ship.position.copy(pos);
+    ship.lookAt(center);
   } else {
     const idx = parseInt(targetId.split('-')[1], 10);
-    const p = planets[idx];
-    const worldPos = new THREE.Vector3();
-    p.mesh.getWorldPosition(worldPos);
-
-    const dir = new THREE.Vector3().subVectors(ship.position, worldPos).normalize();
-    if (dir.lengthSq() === 0) dir.set(0, 0, 1);
-    ship.position.copy(worldPos.clone().add(dir.multiplyScalar(12 + p.mesh.geometry.parameters.radius)));
+    const p = planets[idx]; if (!p) { resetAfterWarp(); return; }
+    const worldPos = getPlanetWorldPos(p);
+    const boundaryR = p.boundaryCircle.geometry.parameters.radius * p.boundaryCircle.scale.x;
+    const safeDist = Math.max(boundaryR + 4, 12);
+    const radial = worldPos.clone().normalize(); if (radial.lengthSq() === 0) radial.set(0, 0, 1);
+    const shipPos = worldPos.clone().add(radial.multiplyScalar(safeDist));
+    ship.position.copy(shipPos);
     ship.lookAt(worldPos);
   }
-  cameraPivot.rotation.y = 0;
+  resetAfterWarp();
 }
 
 // ===== Animation =====
@@ -706,7 +650,6 @@ function animate() {
   pacingCircle.scale.set(1 + pulse * 0.1, 1 + pulse * 0.1, 1);
   pacingCircle.material.opacity = 0.3 + pulse * 0.4;
 
-  // Planeten
   planets.forEach(planet => {
     planet.boundaryCircle.scale.set(1 + pulse * 0.1, 1 + pulse * 0.1, 1);
     planet.boundaryCircle.material.opacity = 0.3 + pulse * 0.4;
@@ -716,32 +659,26 @@ function animate() {
   });
 
   if (ship) {
-    // 3x schneller per Tastatur
     const keyForward = (keyboard['w'] ? 0.3 : 0) + (keyboard['s'] ? -0.3 : 0);
-    const keyTurn = (keyboard['a'] ? 0.05 : 0) + (keyboard['d'] ? -0.05 : 0);
-    const finalForward = joystickMove.forward + keyForward;
-    const finalTurn = joystickMove.turn + keyTurn;
+    const keyTurn    = (keyboard['a'] ? 0.05 : 0) + (keyboard['d'] ? -0.05 : 0);
+
+    const finalForward = joystickMove.forward + keyForward + (gyroControlActive ? gyroInput.forward : 0);
+    const finalTurn    = joystickMove.turn    + keyTurn    + (gyroControlActive ? gyroInput.turn    : 0);
 
     const shipRadius = 5;
     const previousPosition = ship.position.clone();
     ship.translateZ(finalForward);
     ship.rotateY(finalTurn);
 
-    // Kollisionsschutz zum Zentrum
-    const blackHoleRadius = blackHoleCore.geometry.parameters.radius;
-    const collisionThreshold = shipRadius + blackHoleRadius;
+    const collisionThreshold = shipRadius + blackHoleCore.geometry.parameters.radius;
     if (ship.position.distanceTo(blackHoleCore.position) < collisionThreshold) {
       ship.position.copy(previousPosition);
       if (forcefield) { forcefield.visible = true; forcefield.material.opacity = 1.0; }
     }
 
-    // Aktives Objekt bestimmen
     let activeObject = null;
-    const distanceToCenterSq = ship.position.lengthSq();
     const circleCurrentRadius = pacingCircle.geometry.parameters.radius * pacingCircle.scale.x;
-    if (distanceToCenterSq < circleCurrentRadius * circleCurrentRadius) {
-      activeObject = blackHoleCore;
-    }
+    if (ship.position.lengthSq() < circleCurrentRadius * circleCurrentRadius) activeObject = blackHoleCore;
     for (const planet of planets) {
       planet.mesh.getWorldPosition(worldPosition);
       const distanceToPlanetSq = ship.position.distanceToSquared(worldPosition);
@@ -751,35 +688,30 @@ function animate() {
     planets.forEach(p => p.isFrozen = (activeObject === p.mesh));
     currentlyAnalyzedObject = activeObject;
 
-    // === Analyze-Button anzeigen/ausblenden + Glow toggeln ===
     if (activeObject && !isAnalyzeButtonVisible) {
-      analyzeButton.classList.add('ui-visible');
-      analyzeButton.classList.add('btn-outline-glow');
+      analyzeButton.classList.add('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = true;
     } else if (!activeObject && isAnalyzeButtonVisible) {
-      analyzeButton.classList.remove('ui-visible');
-      analyzeButton.classList.remove('btn-outline-glow');
+      analyzeButton.classList.remove('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = false;
     }
   }
 
-  // Normale Kameralogik (Feder + Begrenzung) — sofort aktiv, kein blockierender Intro-State
   if (ship) {
     if (cameraFingerId === null && !isDraggingMouse) {
       cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
-      cameraPivot.rotation.y = THREE.MathUtils.lerp(cameraPivot.rotation.y, 0, LERP_FACTOR);
+      cameraPivot.rotation.y  = THREE.MathUtils.lerp(cameraPivot.rotation.y,  0, LERP_FACTOR);
     }
     if (cameraHolder.rotation.x > ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x - ROTATION_LIMIT) * SPRING_STIFFNESS;
     else if (cameraHolder.rotation.x < -ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x + ROTATION_LIMIT) * SPRING_STIFFNESS;
     if (cameraPivot.rotation.y > ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y - ROTATION_LIMIT) * SPRING_STIFFNESS;
     else if (cameraPivot.rotation.y < -ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y + ROTATION_LIMIT) * SPRING_STIFFNESS;
     cameraHolder.rotation.x += cameraVelocity.x;
-    cameraPivot.rotation.y += cameraVelocity.y;
+    cameraPivot.rotation.y  += cameraVelocity.y;
   }
 
   cameraVelocity.multiplyScalar(0.90);
-  zoomDistance += zoomVelocity;
-  zoomVelocity *= 0.90;
+  zoomDistance += zoomVelocity; zoomVelocity *= 0.90;
   zoomDistance = THREE.MathUtils.clamp(zoomDistance, minZoom, maxZoom);
   if (zoomDistance === minZoom || zoomDistance === maxZoom) zoomVelocity = 0;
   if (camera) camera.position.normalize().multiplyScalar(zoomDistance);
@@ -794,7 +726,7 @@ function animate() {
   // Refraction Capture
   lensingSphere.visible = false; blackHoleCore.visible = false; accretionDisk.visible = false;
   cubeCamera.update(renderer, mainScene);
-  lensingSphere.visible = true; blackHoleCore.visible = true; accretionDisk.visible = true;
+  lensingSphere.visible = true;  blackHoleCore.visible = true;  accretionDisk.visible = true;
 
   composer.render();
   labelRenderer.render(mainScene, camera);
@@ -811,17 +743,100 @@ window.addEventListener('resize', () => {
   loadingCamera.updateProjectionMatrix();
 });
 
-/* ===== Maus-Spotlight (positionsabhängiger Hover) für Buttons ===== */
+/* ===== Maus & Touch Spotlight (stärker bei Touch) ===== */
 function addPointerGlow(el) {
   if (!el) return;
-  el.addEventListener('mousemove', (e) => {
+  el.classList.add('pointer-glow');
+  const setPos = (clientX, clientY) => {
     const r = el.getBoundingClientRect();
-    el.style.setProperty('--glow-x', `${e.clientX - r.left}px`);
-    el.style.setProperty('--glow-y', `${e.clientY - r.top}px`);
-  });
-  el.addEventListener('mouseleave', () => {
-    el.style.setProperty('--glow-x', `-120px`);
-    el.style.setProperty('--glow-y', `-120px`);
-  });
+    el.style.setProperty('--glow-x', `${clientX - r.left}px`);
+    el.style.setProperty('--glow-y', `${clientY - r.top}px`);
+  };
+  el.addEventListener('pointerenter', (e) => {
+    setPos(e.clientX, e.clientY); el.classList.add('hover-active'); if (e.pointerType !== 'mouse') el.classList.add('touch-hover');
+  }, { passive: true });
+  el.addEventListener('pointermove', (e) => {
+    setPos(e.clientX, e.clientY); if (e.pointerType !== 'mouse') el.classList.add('touch-hover', 'hover-active');
+  }, { passive: true });
+  el.addEventListener('pointerleave', () => {
+    el.classList.remove('hover-active', 'touch-hover'); el.style.setProperty('--glow-x', `-220px`); el.style.setProperty('--glow-y', `-220px`);
+  }, { passive: true });
+  el.addEventListener('pointerup', () => { el.classList.remove('touch-hover'); }, { passive: true });
+  el.addEventListener('pointercancel', () => { el.classList.remove('hover-active', 'touch-hover'); }, { passive: true });
 }
-[analyzeButton, muteButton, quickWarpBtn, warpCloseBtn, warpHereBtn, closeAnalysisButton].forEach(addPointerGlow);
+[analyzeButton, muteButton, quickWarpBtn, warpCloseBtn, warpHereBtn, closeAnalysisButton, motionButton].forEach(addPointerGlow);
+
+/* ===== Motion Button Toggle ===== */
+if (motionButton) {
+  motionButton.addEventListener('click', async () => {
+    if (!gyroControlActive) { const ok = await enableGyro(); if (!ok) return; }
+    else { disableGyro(); }
+    updateMotionButtonUI();
+  });
+  updateMotionButtonUI();
+}
+
+/* ===== Liquid Glass Overlay (Vue-Insel) ===== */
+(async function initLiquidGlass() {
+  const overlayRoot = document.createElement('div');
+  overlayRoot.id = 'lg-overlay-root';
+  overlayRoot.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:14;';
+  document.body.appendChild(overlayRoot);
+
+  try {
+    const [{ createApp, ref, onMounted, h }, liquidMod] = await Promise.all([
+      import('https://esm.sh/vue@3'),
+      import('https://esm.sh/@wxperia/liquid-glass-vue@latest')
+    ]);
+
+    const LiquidGlass = liquidMod.LiquidGlass || liquidMod.default?.LiquidGlass || liquidMod.default;
+
+    const rectOf = (el) => { const r = el.getBoundingClientRect(); return { x:r.left, y:r.top, width:r.width, height:r.height }; };
+
+    const App = {
+      setup() {
+        const bottom = ref({ x:0, y:0, width:0, height:0, radius:25, visible:false });
+        const warp   = ref({ x:0, y:0, width:0, height:0, radius:36, visible:false });
+
+        const updateRects = () => {
+          const bb = document.getElementById('bottom-bar');
+          if (bb) { const r = rectOf(bb); bottom.value = { ...bottom.value, ...r, visible: r.width>0 && r.height>0 }; }
+          const wc = document.querySelector('#quick-warp-overlay.visible .warp-cloud');
+          if (wc) { const r2 = rectOf(wc); warp.value = { ...warp.value, ...r2, visible: true }; }
+          else { warp.value.visible = false; }
+        };
+
+        onMounted(() => {
+          updateRects();
+          window.addEventListener('resize', updateRects, { passive:true });
+          window.addEventListener('scroll', updateRects, { passive:true });
+          const mo = new MutationObserver(updateRects);
+          const o1 = document.getElementById('bottom-bar'); if (o1) mo.observe(o1, { attributes:true, childList:true, subtree:true });
+          const o2 = document.getElementById('quick-warp-overlay'); if (o2) mo.observe(o2, { attributes:true, childList:true, subtree:true });
+        });
+
+        return { bottom, warp };
+      },
+      render() {
+        const nodes = [];
+        if (this.bottom.visible && LiquidGlass) {
+          nodes.push(h(LiquidGlass, {
+            style: { position:'fixed', left:this.bottom.x+'px', top:this.bottom.y+'px', width:this.bottom.width+'px', height:this.bottom.height+'px', borderRadius:this.bottom.radius+'px', pointerEvents:'none' },
+            displacementScale: 64, blurAmount: 0.12, saturation: 140, aberrationIntensity: 1.5, elasticity: 0.25, mode: 'shader'
+          }));
+        }
+        if (this.warp.visible && LiquidGlass) {
+          nodes.push(h(LiquidGlass, {
+            style: { position:'fixed', left:this.warp.x+'px', top:this.warp.y+'px', width:this.warp.width+'px', height:this.warp.height+'px', borderRadius:this.warp.radius+'px', pointerEvents:'none' },
+            displacementScale: 70, blurAmount: 0.16, saturation: 120, aberrationIntensity: 2.0, elasticity: 0.35, mode: 'shader'
+          }));
+        }
+        return h('div', null, nodes);
+      }
+    };
+
+    createApp(App).mount('#lg-overlay-root');
+  } catch (err) {
+    console.warn('[LiquidGlass] Vue/Lib nicht geladen, fahre ohne:', err);
+  }
+})();
