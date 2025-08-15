@@ -62,46 +62,56 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; z-index: 20;
 }
 
+/* === Bottom Bar (Hintergrund transparent: LiquidGlass übernimmt) === */
 #bottom-bar {
   position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px; height: 90px;
-  background: rgba(30,30,30,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 25px;
+  background: transparent !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 25px;
   display: flex; align-items: center; justify-content: flex-end;
   padding: 0 20px; gap: 10px; box-sizing: border-box; z-index: 15;
 }
 
-#mute-button, #analyze-button { position: relative; top: 0; right: 0; }
+#mute-button, #analyze-button, #motion-button { position: relative; top: 0; right: 0; }
 
-#mute-button {
+/* Round Icon Button */
+.icon-btn {
   width: 48px; height: 48px; background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
   cursor: pointer; padding: 12px; transition: background-color .2s ease;
 }
 
+/* Analyze Pill */
 #analyze-button {
   padding: 12px 24px; background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 16px;
   cursor: pointer; border-radius: 50px; opacity: 0; pointer-events: none; transition: opacity .5s ease;
 }
 #analyze-button.ui-visible { opacity: 1; pointer-events: auto; }
-#mute-button:hover, #analyze-button:hover { background-color: rgba(255,255,255,0.1); }
-#mute-button svg { width: 100%; height: 100%; }
+
+#mute-button:hover, #analyze-button:hover, #motion-button:hover { background-color: rgba(255,255,255,0.1); }
+
+#mute-button svg, #motion-button svg { width: 100%; height: 100%; fill: white; }
 #speaker-icon { fill: white; }
 #mute-slash { fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; opacity: 0; transform-origin: center; transform: scale(0.8); transition: opacity .3s ease, transform .3s ease; }
 #mute-button.muted #mute-slash { opacity: 1; transform: scale(1); }
 
-/* === Analyze-Button Outline-Glow (fix: nicht abgeschnitten, Radius korrekt) === */
+/* Motion Button aktiv */
+#motion-button.on { outline: 2px solid rgba(86,156,255,0.8); box-shadow: 0 0 12px rgba(86,156,255,0.8); }
+
+/* === Analyze-Button Outline-Glow (fix) === */
 #analyze-button.btn-outline-glow {
   position: relative;
   isolation: isolate;
-  overflow: visible; /* Glow darf über den Button hinaus */
+  overflow: visible;
 }
 #analyze-button.btn-outline-glow::after {
   content: "";
   position: absolute;
   inset: -8px;
   border: 2px solid rgba(255,255,255,0.9);
-  border-radius: inherit; /* exakt gleiche Rundung wie Button */
+  border-radius: inherit;
   box-shadow: 0 0 12px rgba(255,255,255,0.9), 0 0 24px rgba(255,255,255,0.6);
   pointer-events: none;
   opacity: 1;
@@ -113,7 +123,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   100% { transform: scale(0.98); opacity: 1; }
 }
 
-/* === Cursor/Touch Spotlight für Buttons === */
+/* === Cursor/Touch Spotlight === */
 .pointer-glow { position: relative; touch-action: manipulation; }
 .pointer-glow::before {
   content: "";
@@ -124,13 +134,10 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
     rgba(255,255,255,0.28),
     rgba(255,255,255,0) 60%
   );
-  opacity: 0; transition: opacity .18s ease;
-  pointer-events: none;
+  opacity: 0; transition: opacity .18s ease; pointer-events: none;
 }
-/* Maus-Hover ODER programmatisch aktivierter Hover */
 .pointer-glow:hover::before,
 .pointer-glow.hover-active::before { opacity: 1; }
-/* Stärkerer/Größerer Spot bei Touch/Stylus */
 .pointer-glow.touch-hover::before {
   background: radial-gradient(
     220px 220px at var(--glow-x, -220px) var(--glow-y, -220px),
@@ -158,6 +165,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
 }
 #quick-warp-btn:hover { background: rgba(255,255,255,0.2); }
 
+/* Overlay bleibt wie gehabt, nur Card wird transparent für LiquidGlass */
 #quick-warp-overlay {
   position: fixed; inset: 0;
   background: rgba(255,255,255,0.06);
@@ -169,11 +177,13 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   transition: opacity .3s ease;
 }
 #quick-warp-overlay.visible { opacity: 1; pointer-events: auto; }
+
 .warp-cloud {
   width: min(92vw, 560px);
   height: min(72vh, 680px);
-  background: radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,0.18), rgba(255,255,255,0.06) 70%);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: none !important;
   border-radius: 36px;
   color: #fff;
   display: flex; flex-direction: column;
@@ -247,7 +257,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
 #close-analysis-button:hover { background: rgba(255,255,255,0.1); }
 #close-analysis-button svg { width: 100%; height: 100%; fill: white; }
 
-/* --- Bilder/Text im Analyse-Fenster --- */
+/* Analyse-Inhalte */
 #analysis-text-content img { max-width: 100%; height: auto; border-radius: 12px; display: block; }
 #analysis-text-content .analysis-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
 
@@ -256,5 +266,6 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   #joystick-zone { width: 140px; height: 140px; }
   #bottom-bar { height: 80px; padding: 0 15px; gap: 8px; }
   #analyze-button { padding: 10px 16px; font-size: 14px; }
-  #mute-button { width: 40px; height: 40px; padding: 8px; }
+  .icon-btn { width: 40px; height: 40px; padding: 8px; }
 }
+
