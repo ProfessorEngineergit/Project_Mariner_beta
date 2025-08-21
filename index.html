@@ -23,11 +23,11 @@
   <div id="info">STEUERUNG: JOYSTICK (LINKS) | KAMERA: 1-FINGER-WISCHEN | ZOOM: 2-FINGER-PINCH</div>
   <div id="joystick-zone"></div>
 
-  <div id="bottom-bar">
-    <button id="analyze-button">Analyze Object</button>
+  <div id="bottom-bar" class="liquid-glass">
+    <button id="analyze-button" class="pointer-glow">Analyze Object</button>
 
-    <!-- NEW: Motion Control Toggle -->
-    <button id="motion-toggle-button" title="Motion Control umschalten" aria-pressed="false">
+    <!-- Motion Control Toggle (Gyro) – default OFF -->
+    <button id="motion-toggle-button" title="Motion Control umschalten" aria-pressed="false" class="pointer-glow">
       <!-- simple phone-tilt icon -->
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 2h7.5a2 2 0 0 1 1.95 1.56l1.9 9.48a2 2 0 0 1-1.56 2.35l-7.48 1.5A2 2 0 0 1 7.3 15.7L5.1 4.45A2 2 0 0 1 7 2z" fill="#fff"/>
@@ -35,31 +35,12 @@
       </svg>
     </button>
 
-    <button id="mute-button" title="Ton umschalten" aria-pressed="false">
+    <button id="mute-button" title="Ton umschalten" aria-pressed="false" class="pointer-glow">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
         <path id="speaker-icon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         <path id="mute-slash" d="M1 1l22 22"/>
       </svg>
     </button>
-  </div>
-
-  <!-- Quick Warp Button -->
-  <button id="quick-warp-btn" class="hidden" aria-haspopup="dialog">Quick Warp</button>
-
-  <!-- Quick Warp Overlay -->
-  <div id="quick-warp-overlay" aria-hidden="true">
-    <div class="warp-cloud">
-      <header class="warp-header">
-        <h2>Warp Navigation</h2>
-        <button id="warp-close" title="Schließen" aria-label="Schließen">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </header>
-      <ul id="warp-list" role="listbox" aria-label="Ziele"></ul>
-      <div id="warp-action">
-        <button id="warp-here" disabled>Warp here</button>
-      </div>
-    </div>
   </div>
 
   <!-- Ladebildschirm -->
@@ -72,12 +53,14 @@
   </div>
 
   <!-- Analyse-Fenster -->
-  <div id="analysis-window">
+  <div id="analysis-window" aria-hidden="true">
     <div class="analysis-content">
       <h1 id="analysis-title">Object Name</h1>
       <div id="analysis-text-content"></div>
-      <button id="close-analysis-button" title="Schließen" aria-label="Schließen">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      <button id="close-analysis-button" title="Schließen" aria-label="Schließen" class="pointer-glow">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
       </button>
     </div>
   </div>
