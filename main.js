@@ -42,7 +42,7 @@ const joystickZone = document.getElementById('joystick-zone');
 const bottomBar = document.getElementById('bottom-bar');
 const muteButton = document.getElementById('mute-button');
 const analyzeButton = document.getElementById('analyze-button');
-const motionToggleBtn = document.getElementById('motion-toggle-button');
+const motionToggleButton = document.getElementById('motion-toggle-button');
 const audio = document.getElementById('media-player');
 
 const analysisWindow = document.getElementById('analysis-window');
@@ -98,26 +98,24 @@ function createGalaxy() {
     const i3 = i * 3;
     const radius = Math.random() * parameters.radius;
     const spinAngle = radius * parameters.spin;
-    theLoop: {
-      const branchAngle = (i % parameters.arms) / parameters.arms * Math.PI * 2;
+    const branchAngle = (i % parameters.arms) / parameters.arms * Math.PI * 2;
 
-      const rnd = parameters.randomness;
-      const pow = parameters.randomnessPower;
+    const rnd = parameters.randomness;
+    const pow = parameters.randomnessPower;
 
-      const randomX = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
-      const randomY = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius * 0.1;
-      const randomZ = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
+    const randomX = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
+    const randomY = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius * 0.1;
+    const randomZ = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
 
-      positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
-      positions[i3 + 1] = randomY;
-      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+    positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+    positions[i3 + 1] = randomY;
+    positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
-      const mixedColor = colorInside.clone();
-      mixedColor.lerp(colorOutside, radius / parameters.radius);
-      colors[i3] = mixedColor.r;
-      colors[i3 + 1] = mixedColor.g;
-      colors[i3 + 2] = mixedColor.b;
-    }
+    const mixedColor = colorInside.clone();
+    mixedColor.lerp(colorOutside, radius / parameters.radius);
+    colors[i3] = mixedColor.r;
+    colors[i3 + 1] = mixedColor.g;
+    colors[i3 + 2] = mixedColor.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -227,16 +225,16 @@ const planetData = [
   { name: '3D-Printing (The ultimate engineering-tool)', radius: 1.6, orbit: 125, speed: 0.006 }
 ];
 
-function createPlanetTexture(hue) {
+function createPlanetTexture(color) {
   const canvas = document.createElement('canvas');
   canvas.width = 128; canvas.height = 128;
   const context = canvas.getContext('2d');
-  context.fillStyle = `hsl(${hue}, 70%, 50%)`;
+  context.fillStyle = `hsl(${color}, 70%, 50%)`;
   context.fillRect(0, 0, 128, 128);
   for (let i = 0; i < 3000; i++) {
     const x = Math.random() * 128; const y = Math.random() * 128; const r = Math.random() * 1.5;
     context.beginPath(); context.arc(x, y, r, 0, Math.PI * 2);
-    context.fillStyle = `hsla(${hue + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
+    context.fillStyle = `hsla(${color + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
     context.fill();
   }
   return new THREE.CanvasTexture(canvas);
@@ -349,12 +347,16 @@ SURGE is my 8th-grade capstone project — an autonomous, electrically powered m
   },
   'OpenImageLabel (A website to label images for professional photography)': {
     title: 'OpenImageLabel',
-    html: `<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>`,
+    html: `
+<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>
+`,
     images: []
   },
   'Project Cablerack (A smarter way to cable-manage)': {
     title: 'Project Cablerack',
-    html: `<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>`,
+    html: `
+<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>
+`,
     images: ['Rack 2.png']
   },
   'Socials/Other Sites': {
@@ -373,36 +375,57 @@ SURGE is my 8th-grade capstone project — an autonomous, electrically powered m
   },
   'HA-Lightswitch (Making analog Lightswitches smart)': {
     title: 'HA-Lightswitch',
-    html: `<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
-Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>`,
+    html: `
+<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
+Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>
+`,
     images: []
   },
   'My Creative Work (Filming, flying, photography)': {
     title: 'Creative Work',
-    html: `<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>`,
+    html: `
+<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>
+`,
     images: []
   },
   '3D-Printing (The ultimate engineering-tool)': {
     title: '3D-Printing',
-    html: `<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>`,
+    html: `
+<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>
+`,
     images: []
   }
 };
 // ===== ENDE INHALTE =====
 
-// Gyro-Helpers
-function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
-function lerp(a, b, t) { return a + (b - a) * t; }
+// States
+let appState = 'loading';
+let isAnalyzeButtonVisible = false;
+let currentlyAnalyzedObject = null;
+
+createHyperspaceEffect();
+animate();
+
+const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+loader.setDRACOLoader(dracoLoader);
+
+// Neuer Repo-/Pages-Pfad für die GLB:
+const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
 // ======= GYRO-STEERING VARS =======
-let gyroControlActive = false;               // default OFF
-const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt
+let gyroControlActive = false;
+const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt (beim ersten Event)
 const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
-const GYRO_FORWARD_FACTOR = 0.015;
-const GYRO_TURN_FACTOR    = 0.003;
-const GYRO_MAX_FORWARD    = 0.35;
-const GYRO_MAX_TURN       = 0.06;
-const GYRO_SMOOTHING      = 0.12;
+const GYRO_FORWARD_FACTOR = 0.015; // ~0.3 bei ~20° Kipp (vor/zurück)
+const GYRO_TURN_FACTOR    = 0.003; // ~0.06 bei ~20° Kipp (links/rechts)
+const GYRO_MAX_FORWARD    = 0.35;  // clamp für Vortrieb
+const GYRO_MAX_TURN       = 0.06;  // clamp für Rotation
+const GYRO_SMOOTHING      = 0.12;  // LERP-Faktor
+
+function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
 
 function onDeviceOrientation(e) {
   const beta = (typeof e.beta === 'number') ? e.beta : 0;
@@ -413,8 +436,8 @@ function onDeviceOrientation(e) {
     gyroBaseline.gamma = gamma;
   }
 
-  const dBeta = beta - gyroBaseline.beta;     // vor/zurück
-  const dGamma = gamma - gyroBaseline.gamma;  // links/rechts
+  const dBeta = beta - gyroBaseline.beta;   // vor/zurück
+  const dGamma = gamma - gyroBaseline.gamma; // links/rechts
 
   const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
   const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
@@ -446,23 +469,8 @@ function disableGyro() {
   gyroInput.forward = 0;
   gyroInput.turn = 0;
 }
-function setMotionUI(isOn) {
-  motionToggleBtn.setAttribute('aria-pressed', String(isOn));
-  motionToggleBtn.classList.toggle('active', isOn);
-}
 
 // ======= LOAD MODEL =======
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-loader.setDRACOLoader(dracoLoader);
-
-// Repo-/Pages-Pfad für das GLB:
-const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
-
-createHyperspaceEffect();
-animate();
-
 loader.load(
   modelURL,
   (gltf) => {
@@ -485,7 +493,7 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Tap: Audio starten, Kamera seitlich "loslassen"
+    // Beim Tap: Audio optional starten, UI einblenden (Gyro NICHT auto-aktivieren)
     loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
@@ -494,14 +502,12 @@ loader.load(
       cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
 
-      // Gyro NICHT automatisch – nur per Button
-      // if (window.isSecureContext) { enableGyro(); }
-
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
-      // Motion-Toggle anzeigen
-      motionToggleBtn.classList.add('ui-visible');
+
+      // Motion-Toggle sichtbar machen
+      motionToggleButton.classList.add('ui-visible');
     }, { once: true });
   },
   (xhr) => {
@@ -529,19 +535,21 @@ let isDraggingMouse = false;
 let initialPinchDistance = 0;
 let previousTouch = { x: 0, y: 0 };
 
+/* ===== Audio: Mute/Unmute ===== */
 muteButton.addEventListener('click', () => {
   if (!audio) return;
   audio.muted = !audio.muted;
   muteButton.classList.toggle('muted');
 });
 
+/* ===== Keyboard ===== */
 window.addEventListener('keydown', (e) => {
   keyboard[e.key.toLowerCase()] = true;
   if ((e.key === '=' || e.key === '-' || e.key === '+') && (e.ctrlKey || e.metaKey)) e.preventDefault();
 });
 window.addEventListener('keyup', (e) => { keyboard[e.key.toLowerCase()] = false; });
 
-// nipplejs muss im HTML geladen sein
+/* ===== Joystick (nipplejs) ===== */
 /* global nipplejs */
 nipplejs.create({
   zone: document.getElementById('joystick-zone'),
@@ -558,6 +566,7 @@ nipplejs.create({
 })
 .on('end', () => joystickMove = { forward: 0, turn: 0 });
 
+/* ===== Touch/Mouse Kamera ===== */
 renderer.domElement.addEventListener('touchstart', (e) => {
   const joystickTouch = Array.from(e.changedTouches).some(t => t.target.closest('#joystick-zone'));
   if (joystickTouch) return;
@@ -621,7 +630,7 @@ function getPinchDistance(e) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// ===== Analyse-Fenster =====
+/* ===== Analyse-Fenster ===== */
 analyzeButton.addEventListener('click', () => {
   if (!currentlyAnalyzedObject) return;
 
@@ -656,37 +665,26 @@ closeAnalysisButton.addEventListener('click', () => {
   appState = 'playing';
 });
 
-// ===== Motion-Toggle (Gyro) =====
-motionToggleBtn.addEventListener('click', async () => {
-  if (gyroControlActive) {
-    disableGyro();
-    setMotionUI(false);
+/* ===== Motion Toggle ===== */
+motionToggleButton.addEventListener('click', async () => {
+  const willEnable = !gyroControlActive;
+
+  if (willEnable) {
+    await enableGyro();
+    if (gyroControlActive) {
+      motionToggleButton.classList.add('active');
+      motionToggleButton.setAttribute('aria-pressed', 'true');
+    }
   } else {
-    await enableGyro();               // versucht Permission zu holen
-    setMotionUI(gyroControlActive);   // nur „on“, wenn Permission geklappt hat
+    disableGyro();
+    motionToggleButton.classList.remove('active');
+    motionToggleButton.setAttribute('aria-pressed', 'false');
   }
 });
 
-// ===== Audio beim Tab-Verlassen pausieren =====
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' && audio && !audio.paused) {
-    audio.pause();
-  }
-});
-
-// ===== Seite aus BFCache zurück? → hart neu laden =====
-window.addEventListener('pageshow', (e) => {
-  const nav = performance.getEntriesByType?.('navigation')?.[0];
-  const isBFCache = e.persisted || (nav && nav.type === 'back_forward');
-  if (isBFCache) window.location.reload();
-});
-
-// ===== Animation =====
+/* ===== Animation ===== */
 const clock = new THREE.Clock();
 const worldPosition = new THREE.Vector3();
-let appState = 'loading';
-let isAnalyzeButtonVisible = false;
-let currentlyAnalyzedObject = null;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -813,7 +811,7 @@ window.addEventListener('resize', () => {
 /* ===== Maus & Touch Spotlight mit stärkerem Touch-Hover ===== */
 function addPointerGlow(el) {
   if (!el) return;
-  el.classList.add('pointer-glow');
+  el.classList.add('pointer-glow'); // <- wichtig, damit ::before greift
 
   const setPos = (clientX, clientY) => {
     const r = el.getBoundingClientRect();
@@ -838,13 +836,22 @@ function addPointerGlow(el) {
     el.style.setProperty('--glow-y', `-220px`);
   }, { passive: true });
 
-  el.addEventListener('pointerup', () => {
-    el.classList.remove('touch-hover');
-  }, { passive: true });
-
-  el.addEventListener('pointercancel', () => {
-    el.classList.remove('hover-active', 'touch-hover');
-  }, { passive: true });
+  el.addEventListener('pointerup', () => { el.classList.remove('touch-hover'); }, { passive: true });
+  el.addEventListener('pointercancel', () => { el.classList.remove('hover-active', 'touch-hover'); }, { passive: true });
 }
+[analyzeButton, muteButton, motionToggleButton, closeAnalysisButton].forEach(addPointerGlow);
 
-[analyzeButton, muteButton, closeAnalysisButton, motionToggleBtn].forEach(addPointerGlow);
+/* ===== Musik stoppen, wenn Tab verlassen ===== */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && audio && !audio.paused) {
+    try { audio.pause(); } catch {}
+  }
+});
+
+/* ===== Seite bei Rückkehr aus bfcache refreshen ===== */
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Neu laden, um State zu resetten (Safari/Firefox bfcache)
+    window.location.reload();
+  }
+});
