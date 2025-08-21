@@ -72,7 +72,6 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   overflow: hidden;
 }
 .liquid-glass::before {
-  /* Caustic/Highlight-Bubble, folgt dem Cursor/Finger (via --lg-x/y) */
   content: "";
   position: absolute; inset: -20%;
   background: radial-gradient(60% 40% at var(--lg-x, 50%) var(--lg-y, 50%),
@@ -84,7 +83,6 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   pointer-events: none;
 }
 .liquid-glass::after {
-  /* subtile Noise-Schicht (körnt das Glas leicht) */
   content: "";
   position: absolute; inset: 0;
   background-image:
@@ -115,12 +113,13 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
   width: 48px; height: 48px; background: rgba(0,0,0,0.25);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
   cursor: pointer; padding: 12px; transition: background-color .2s ease;
+  color: #fff;
 }
 
 #analyze-button, #motion-toggle-button {
   padding: 12px 20px; background: rgba(0,0,0,0.25);
   border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 16px;
-  cursor: pointer; border-radius: 50px; opacity: 0; pointer-events: none; transition: opacity .5s ease, background-color .2s ease;
+  cursor: pointer; border-radius: 50px; opacity: 0; pointer-events: none; transition: opacity .5s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease;
 }
 #analyze-button.ui-visible, #motion-toggle-button.ui-visible { opacity: 1; pointer-events: auto; }
 #mute-button:hover, #analyze-button:hover, #motion-toggle-button:hover { background-color: rgba(255,255,255,0.1); }
@@ -129,7 +128,14 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
 #mute-slash { fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; opacity: 0; transform-origin: center; transform: scale(0.8); transition: opacity .3s ease, transform .3s ease; }
 #mute-button.muted #mute-slash { opacity: 1; transform: scale(1); }
 
-/* === Analyze-Button Outline-Glow === */
+/* Motion Toggle aktiv (leuchtet, Transparenz ~0) */
+#motion-toggle-button.active {
+  background: rgba(255,255,255,0.95);
+  color: #111;
+  box-shadow: 0 0 18px rgba(255,255,255,0.9), 0 0 32px rgba(255,255,255,0.6);
+}
+
+/* === Analyze-Button Outline-Glow (korrekter Radius) === */
 #analyze-button.btn-outline-glow {
   position: relative;
   isolation: isolate;
@@ -174,21 +180,6 @@ canvas { display: block; position: absolute; top: 0; left: 0; touch-action: none
     rgba(255,255,255,0.55),
     rgba(255,255,255,0) 60%
   );
-}
-
-/* === Motion-Toggle aktiver Zustand (leuchtet, quasi "Transparenz 0") === */
-#motion-toggle-button.active,
-#motion-toggle-button[aria-pressed="true"] {
-  background: rgba(255,255,255,1);
-  color: #000;
-  border-color: rgba(255,255,255,1);
-  box-shadow: 0 0 14px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.55);
-}
-#motion-toggle-button svg { width: 24px; height: 24px; opacity: .75; transition: opacity .2s ease, transform .2s ease; }
-#motion-toggle-button.active svg,
-#motion-toggle-button[aria-pressed="true"] svg {
-  opacity: 1;
-  transform: scale(1.02);
 }
 
 /* Ladebildschirm */
