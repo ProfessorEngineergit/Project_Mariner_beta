@@ -1,4 +1,3 @@
-// ===== IMPORTS =====
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
@@ -7,7 +6,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-// ===== GRUND-SETUP =====
+/* --- Grundsetup --- */
 const mainScene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -15,8 +14,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-renderer.domElement.addEventListener('dragstart', (e) => e.preventDefault());
-renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+renderer.domElement.addEventListener('dragstart', e => e.preventDefault());
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
 
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -24,15 +23,12 @@ labelRenderer.domElement.id = 'label-container';
 document.body.appendChild(labelRenderer.domElement);
 
 const renderScene = new RenderPass(mainScene, camera);
-const bloomPass = new UnrealBloomPass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  1.2, 0.4, 0.9
-);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.4, 0.9);
 const composer = new EffectComposer(renderer);
 composer.addPass(renderScene);
 composer.addPass(bloomPass);
 
-// ===== UI REFERENZEN =====
+/* --- UI --- */
 const loadingScreen = document.getElementById('loading-screen');
 const progressBar = document.getElementById('progress-bar');
 const loadingTitle = document.getElementById('loading-title');
@@ -50,7 +46,7 @@ const analysisTitle = document.getElementById('analysis-title');
 const analysisTextContent = document.getElementById('analysis-text-content');
 const closeAnalysisButton = document.getElementById('close-analysis-button');
 
-// ===== HYPERSPACE-LOADING =====
+/* --- Hyperspace Loading --- */
 const loadingScene = new THREE.Scene();
 const loadingCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 let hyperspaceParticles;
@@ -68,14 +64,12 @@ function createHyperspaceEffect() {
     );
   }
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  const material = new THREE.PointsMaterial({
-    color: 0xffffff, size: 0.1, blending: THREE.AdditiveBlending
-  });
+  const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1, blending: THREE.AdditiveBlending });
   hyperspaceParticles = new THREE.Points(geometry, material);
   loadingScene.add(hyperspaceParticles);
 }
 
-// ===== LICHT & GALAXY =====
+/* --- Licht & Galaxy --- */
 mainScene.add(new THREE.AmbientLight(0xffffff, 0.4));
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(10, 20, 15);
@@ -113,9 +107,7 @@ function createGalaxy() {
 
     const mixedColor = colorInside.clone();
     mixedColor.lerp(colorOutside, radius / parameters.radius);
-    colors[i3] = mixedColor.r;
-    colors[i3 + 1] = mixedColor.g;
-    colors[i3 + 2] = mixedColor.b;
+    colors[i3] = mixedColor.r; colors[i3 + 1] = mixedColor.g; colors[i3 + 2] = mixedColor.b;
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -123,24 +115,18 @@ function createGalaxy() {
 
   const canvas = document.createElement('canvas');
   canvas.width = 64; canvas.height = 64;
-  const context = canvas.getContext('2d');
-  const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.2, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)');
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, 64, 64);
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.2, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.3)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 64, 64);
   const particleTexture = new THREE.CanvasTexture(canvas);
 
   const material = new THREE.PointsMaterial({
-    size: parameters.size,
-    sizeAttenuation: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true,
-    map: particleTexture,
-    transparent: true
+    size: parameters.size, sizeAttenuation: true, depthWrite: false,
+    blending: THREE.AdditiveBlending, vertexColors: true, map: particleTexture, transparent: true
   });
 
   galaxy = new THREE.Points(geometry, material);
@@ -148,17 +134,12 @@ function createGalaxy() {
 }
 createGalaxy();
 
-// Schwarzes Loch + Lens  (Name bleibt Project_Mariner)
-const blackHoleCore = new THREE.Mesh(
-  new THREE.SphereGeometry(1.5, 32, 32),
-  new THREE.MeshBasicMaterial({ color: 0x000000 })
-);
+/* --- Black Hole + Lens --- */
+const blackHoleCore = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x000000 }));
 blackHoleCore.name = 'Project_Mariner (This Site)';
 mainScene.add(blackHoleCore);
 
-const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
-  generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter
-});
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
 const cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
 mainScene.add(cubeCamera);
 
@@ -170,17 +151,15 @@ mainScene.add(lensingSphere);
 
 function createAccretionDisk() {
   const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
-  const context = canvas.getContext('2d');
-  const gradient = context.createRadialGradient(128, 128, 80, 128, 128, 128);
-  gradient.addColorStop(0, 'rgba(255, 180, 80, 1)');
-  gradient.addColorStop(0.7, 'rgba(255, 100, 20, 0.5)');
-  gradient.addColorStop(1, 'rgba(0,0,0,0)');
-  context.fillStyle = gradient; context.fillRect(0, 0, 256, 256);
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(128, 128, 80, 128, 128, 128);
+  g.addColorStop(0, 'rgba(255, 180, 80, 1)');
+  g.addColorStop(0.7, 'rgba(255, 100, 20, 0.5)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
   const texture = new THREE.CanvasTexture(canvas);
   const geometry = new THREE.RingGeometry(2.5, 5, 64);
-  const material = new THREE.MeshBasicMaterial({
-    map: texture, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending
-  });
+  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending });
   const disk = new THREE.Mesh(geometry, material);
   disk.rotation.x = Math.PI / 2;
   mainScene.add(disk);
@@ -188,7 +167,7 @@ function createAccretionDisk() {
 }
 const accretionDisk = createAccretionDisk();
 
-// Label Helper (DOM)
+/* --- Labels --- */
 function makeLabel(text) {
   const root = document.createElement('div');
   root.className = 'label';
@@ -198,21 +177,18 @@ function makeLabel(text) {
   root.appendChild(lineDiv);
   return root;
 }
-
-// Blackhole Label
 const blackHoleLabelDiv = makeLabel(blackHoleCore.name);
 const blackHoleLabel = new CSS2DObject(blackHoleLabelDiv);
 blackHoleLabel.position.set(0, 7, 0);
 mainScene.add(blackHoleLabel);
 
-// Pacing Kreis
+/* --- Pacing Ring & Planeten --- */
 const pacingCircleGeometry = new THREE.TorusGeometry(12, 0.1, 16, 100);
 const pacingCircleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 const pacingCircle = new THREE.Mesh(pacingCircleGeometry, pacingCircleMaterial);
 pacingCircle.rotation.x = Math.PI / 2;
 mainScene.add(pacingCircle);
 
-// Planeten
 const planets = [];
 const planetData = [
   { name: 'Infos', radius: 1, orbit: 20, speed: 0.04 },
@@ -228,14 +204,14 @@ const planetData = [
 function createPlanetTexture(color) {
   const canvas = document.createElement('canvas');
   canvas.width = 128; canvas.height = 128;
-  const context = canvas.getContext('2d');
-  context.fillStyle = `hsl(${color}, 70%, 50%)`;
-  context.fillRect(0, 0, 128, 128);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = `hsl(${color}, 70%, 50%)`;
+  ctx.fillRect(0, 0, 128, 128);
   for (let i = 0; i < 3000; i++) {
     const x = Math.random() * 128; const y = Math.random() * 128; const r = Math.random() * 1.5;
-    context.beginPath(); context.arc(x, y, r, 0, Math.PI * 2);
-    context.fillStyle = `hsla(${color + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
-    context.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${color + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
+    ctx.fill();
   }
   return new THREE.CanvasTexture(canvas);
 }
@@ -270,21 +246,20 @@ function createPlanet(data, index) {
 }
 planetData.forEach(createPlanet);
 
-// Einheitliche Winkelgeschwindigkeit → konstante Phasenabstände
 const GLOBAL_ANGULAR_SPEED = 0.02;
 
-// Ship & Kamera
+/* --- Ship & Kamera --- */
 let ship; let forcefield;
 const cameraPivot = new THREE.Object3D();
 const cameraHolder = new THREE.Object3D();
 
 function createForcefield(radius) {
   const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
-  const context = canvas.getContext('2d');
-  context.strokeStyle = 'rgba(255,255,255,0.8)'; context.lineWidth = 3;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 3;
   for (let i = 0; i < 8; i++) {
-    const x = i * 18; context.beginPath(); context.moveTo(x, 0); context.lineTo(x, 128); context.stroke();
-    const y = i * 18; context.beginPath(); context.moveTo(0, y); context.lineTo(128, y); context.stroke();
+    const x = i * 18; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 128); ctx.stroke();
+    const y = i * 18; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(128, y); ctx.stroke();
   }
   const texture = new THREE.CanvasTexture(canvas);
   const geometry = new THREE.SphereGeometry(radius, 32, 32);
@@ -296,7 +271,7 @@ function createForcefield(radius) {
   return ff;
 }
 
-// ===== ✨ INHALTE FÜR ANALYSE-FENSTER =====
+/* --- Analyse-Inhalte --- */
 const OBJECT_CONTENT = {
   'Project_Mariner (This Site)': {
     title: 'Project Mariner',
@@ -339,24 +314,18 @@ UPCOMING: <b>V1.5 PRO</b> (minor fixes +)<br>
   },
   'SURGE (The autonomous Robottaxi)': {
     title: 'SURGE – Autonomous Robottaxi',
-    html: `
-<p><i>(SURGE: Smart Urban Robotic Guidance & Exploration-Pod)</i><br><br>
-SURGE is my 8th-grade capstone project — an autonomous, electrically powered mini robotic taxi. It runs on an NVIDIA Jetson Nano, uses live camera input for navigation, and is built with modular 3D-printed parts. From design to AI control, I built and programmed everything myself.</p>
-`,
+    html: `<p><i>(SURGE: Smart Urban Robotic Guidance & Exploration-Pod)</i><br><br>
+SURGE is my 8th-grade capstone project — an autonomous, electrically powered mini robotic taxi. It runs on an NVIDIA Jetson Nano, uses live camera input for navigation, and is built with modular 3D-printed parts. From design to AI control, I built and programmed everything myself.</p>`,
     images: ['SURGE 2.jpeg']
   },
   'OpenImageLabel (A website to label images for professional photography)': {
     title: 'OpenImageLabel',
-    html: `
-<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>
-`,
+    html: `<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>`,
     images: []
   },
   'Project Cablerack (A smarter way to cable-manage)': {
     title: 'Project Cablerack',
-    html: `
-<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>
-`,
+    html: `<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>`,
     images: ['Rack 2.png']
   },
   'Socials/Other Sites': {
@@ -375,30 +344,23 @@ SURGE is my 8th-grade capstone project — an autonomous, electrically powered m
   },
   'HA-Lightswitch (Making analog Lightswitches smart)': {
     title: 'HA-Lightswitch',
-    html: `
-<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
-Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>
-`,
+    html: `<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
+Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>`,
     images: []
   },
   'My Creative Work (Filming, flying, photography)': {
     title: 'Creative Work',
-    html: `
-<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>
-`,
+    html: `<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>`,
     images: []
   },
   '3D-Printing (The ultimate engineering-tool)': {
     title: '3D-Printing',
-    html: `
-<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>
-`,
+    html: `<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>`,
     images: []
   }
 };
-// ===== ENDE INHALTE =====
 
-// States
+/* --- State --- */
 let appState = 'loading';
 let isAnalyzeButtonVisible = false;
 let currentlyAnalyzedObject = null;
@@ -411,18 +373,17 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
-// Neuer Repo-/Pages-Pfad für die GLB:
 const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
 
-// ======= GYRO-STEERING VARS =======
+/* --- Gyro --- */
 let gyroControlActive = false;
-const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt (beim ersten Event)
-const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
-const GYRO_FORWARD_FACTOR = 0.015; // ~0.3 bei ~20° Kipp (vor/zurück)
-const GYRO_TURN_FACTOR    = 0.003; // ~0.06 bei ~20° Kipp (links/rechts)
-const GYRO_MAX_FORWARD    = 0.35;  // clamp für Vortrieb
-const GYRO_MAX_TURN       = 0.06;  // clamp für Rotation
-const GYRO_SMOOTHING      = 0.12;  // LERP-Faktor
+const gyroBaseline = { beta: null, gamma: null };
+const gyroInput = { forward: 0, turn: 0 };
+const GYRO_FORWARD_FACTOR = 0.015;
+const GYRO_TURN_FACTOR    = 0.003;
+const GYRO_MAX_FORWARD    = 0.35;
+const GYRO_MAX_TURN       = 0.06;
+const GYRO_SMOOTHING      = 0.12;
 
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
@@ -436,8 +397,8 @@ function onDeviceOrientation(e) {
     gyroBaseline.gamma = gamma;
   }
 
-  const dBeta = beta - gyroBaseline.beta;   // vor/zurück
-  const dGamma = gamma - gyroBaseline.gamma; // links/rechts
+  const dBeta = beta - gyroBaseline.beta;
+  const dGamma = gamma - gyroBaseline.gamma;
 
   const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
   const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
@@ -449,8 +410,8 @@ function onDeviceOrientation(e) {
 async function enableGyro() {
   if (gyroControlActive) return;
   try {
-    if (typeof DeviceOrientationEvent !== 'undefined'
-        && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
       const state = await DeviceOrientationEvent.requestPermission();
       if (state !== 'granted') return;
     }
@@ -464,13 +425,11 @@ function disableGyro() {
   if (!gyroControlActive) return;
   window.removeEventListener('deviceorientation', onDeviceOrientation);
   gyroControlActive = false;
-  gyroBaseline.beta = null;
-  gyroBaseline.gamma = null;
-  gyroInput.forward = 0;
-  gyroInput.turn = 0;
+  gyroBaseline.beta = null; gyroBaseline.gamma = null;
+  gyroInput.forward = 0; gyroInput.turn = 0;
 }
 
-// ======= LOAD MODEL =======
+/* --- Load Model --- */
 loader.load(
   modelURL,
   (gltf) => {
@@ -480,7 +439,6 @@ loader.load(
     loadingTitle.textContent = 'Tap to drop out of warp speed';
     loadingScreen.classList.add('clickable');
 
-    // Scene setup
     let shipLoaded = gltf.scene;
     shipLoaded.rotation.y = Math.PI;
     mainScene.add(shipLoaded);
@@ -493,64 +451,60 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Tap: Audio optional starten, UI einblenden (Gyro NICHT auto-aktivieren)
     loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
       if (audio) { audio.play().catch(() => {}); }
 
-      cameraPivot.rotation.y = Math.PI / 2; // 90°
+      cameraPivot.rotation.y = Math.PI / 2;
       appState = 'playing';
 
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
 
-      // Motion-Toggle sichtbar machen
+      // Motion-Button einblendbar
       motionToggleButton.classList.add('ui-visible');
     }, { once: true });
   },
   (xhr) => {
     if (xhr.lengthComputable) {
       loadingProgress = Math.min(1, xhr.loaded / xhr.total);
-      const percentComplete = Math.round(loadingProgress * 100);
-      progressBar.style.width = percentComplete + '%';
-      loadingPercentage.textContent = percentComplete + '%';
+      const percent = Math.round(loadingProgress * 100);
+      progressBar.style.width = percent + '%';
+      loadingPercentage.textContent = percent + '%';
     }
   },
   (error) => { console.error('Ladefehler:', error); loadingTitle.textContent = 'Fehler!'; }
 );
 
-// Steuerung
+/* --- Steuerung --- */
 const keyboard = {};
 let joystickMove = { forward: 0, turn: 0 };
 const ROTATION_LIMIT = Math.PI * 0.33;
 let zoomDistance = 15;
-const minZoom = 8; const maxZoom = 25;
-let cameraVelocity = new THREE.Vector2(0, 0); let zoomVelocity = 0;
-const SPRING_STIFFNESS = 0.03; const DAMPING = 0.90; const LERP_FACTOR = 0.05;
+const minZoom = 8, maxZoom = 25;
+let cameraVelocity = new THREE.Vector2(0, 0), zoomVelocity = 0;
+const SPRING_STIFFNESS = 0.03, LERP_FACTOR = 0.05;
 
 let cameraFingerId = null;
 let isDraggingMouse = false;
 let initialPinchDistance = 0;
 let previousTouch = { x: 0, y: 0 };
 
-/* ===== Audio: Mute/Unmute ===== */
 muteButton.addEventListener('click', () => {
   if (!audio) return;
   audio.muted = !audio.muted;
   muteButton.classList.toggle('muted');
 });
 
-/* ===== Keyboard ===== */
 window.addEventListener('keydown', (e) => {
   keyboard[e.key.toLowerCase()] = true;
   if ((e.key === '=' || e.key === '-' || e.key === '+') && (e.ctrlKey || e.metaKey)) e.preventDefault();
 });
 window.addEventListener('keyup', (e) => { keyboard[e.key.toLowerCase()] = false; });
 
-/* ===== Joystick (nipplejs) ===== */
-/* global nipplejs */
+/* nipplejs */
 nipplejs.create({
   zone: document.getElementById('joystick-zone'),
   mode: 'static',
@@ -560,13 +514,13 @@ nipplejs.create({
 })
 .on('move', (evt, data) => {
   if (data.vector && ship) {
-    joystickMove.forward = data.vector.y * 0.3;     // vor/zurück
-    joystickMove.turn = -data.vector.x * 0.05;      // links/rechts
+    joystickMove.forward = data.vector.y * 0.3;
+    joystickMove.turn = -data.vector.x * 0.05;
   }
 })
 .on('end', () => joystickMove = { forward: 0, turn: 0 });
 
-/* ===== Touch/Mouse Kamera ===== */
+/* Touch/Mouse Kamera */
 renderer.domElement.addEventListener('touchstart', (e) => {
   const joystickTouch = Array.from(e.changedTouches).some(t => t.target.closest('#joystick-zone'));
   if (joystickTouch) return;
@@ -600,7 +554,8 @@ renderer.domElement.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 renderer.domElement.addEventListener('touchend', (e) => {
-  for (const touch of e.changedTouches) if (touch.identifier === cameraFingerId) cameraFingerId = null;
+  for (const touch of e.changedTouches)
+    if (touch.identifier === cameraFingerId) cameraFingerId = null;
   if (e.touches.length < 2) initialPinchDistance = 0;
 });
 
@@ -627,10 +582,10 @@ function getPinchDistance(e) {
   if (e.touches.length < 2) return 0;
   const t1 = e.touches[0], t2 = e.touches[1];
   const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY;
-  return Math.sqrt(dx * dx + dy * dy);
+  return Math.sqrt(dx*dx + dy*dy);
 }
 
-/* ===== Analyse-Fenster ===== */
+/* Analyse-Fenster */
 analyzeButton.addEventListener('click', () => {
   if (!currentlyAnalyzedObject) return;
 
@@ -642,19 +597,15 @@ analyzeButton.addEventListener('click', () => {
   if (content && (content.html || (content.images && content.images.length))) {
     let html = content.html ? content.html : '';
     if (content.images && content.images.length) {
-      const imgs = content.images
-        .map(src => `<img src="${encodeURI(src)}" loading="lazy" alt="">`)
-        .join('');
+      const imgs = content.images.map(src => `<img src="${encodeURI(src)}" loading="lazy" alt="">`).join('');
       html += `<div class="analysis-gallery">${imgs}</div>`;
     }
     analysisTextContent.innerHTML = html;
   } else {
-    analysisTextContent.innerHTML =
-      `<p>Für <em>${objName}</em> ist noch kein Text/Bild hinterlegt. Trage Inhalte im <code>OBJECT_CONTENT</code>-Block ein.</p>`;
+    analysisTextContent.innerHTML = `<p>Für <em>${objName}</em> ist noch kein Text/Bild hinterlegt. Trage Inhalte im <code>OBJECT_CONTENT</code>-Block ein.</p>`;
   }
 
   analyzeButton.classList.remove('btn-outline-glow');
-
   analysisWindow.classList.add('visible');
   analysisWindow.setAttribute('aria-hidden', 'false');
   appState = 'paused';
@@ -665,7 +616,7 @@ closeAnalysisButton.addEventListener('click', () => {
   appState = 'playing';
 });
 
-/* ===== Motion Toggle ===== */
+/* Motion Toggle */
 motionToggleButton.addEventListener('click', async () => {
   const willEnable = !gyroControlActive;
 
@@ -682,7 +633,7 @@ motionToggleButton.addEventListener('click', async () => {
   }
 });
 
-/* ===== Animation ===== */
+/* --- Animation --- */
 const clock = new THREE.Clock();
 const worldPosition = new THREE.Vector3();
 
@@ -704,7 +655,6 @@ function animate() {
   pacingCircle.scale.set(1 + pulse * 0.1, 1 + pulse * 0.1, 1);
   pacingCircle.material.opacity = 0.3 + pulse * 0.4;
 
-  // Planeten
   planets.forEach(planet => {
     planet.boundaryCircle.scale.set(1 + pulse * 0.1, 1 + pulse * 0.1, 1);
     planet.boundaryCircle.material.opacity = 0.3 + pulse * 0.4;
@@ -714,7 +664,6 @@ function animate() {
   });
 
   if (ship) {
-    // Eingaben kombinieren: Keyboard + Joystick + Gyro
     const keyForward = (keyboard['w'] ? 0.3 : 0) + (keyboard['s'] ? -0.3 : 0);
     const keyTurn    = (keyboard['a'] ? 0.05 : 0) + (keyboard['d'] ? -0.05 : 0);
 
@@ -726,7 +675,6 @@ function animate() {
     ship.translateZ(finalForward);
     ship.rotateY(finalTurn);
 
-    // Kollisionsschutz zum Zentrum
     const blackHoleRadius = blackHoleCore.geometry.parameters.radius;
     const collisionThreshold = shipRadius + blackHoleRadius;
     if (ship.position.distanceTo(blackHoleCore.position) < collisionThreshold) {
@@ -734,7 +682,6 @@ function animate() {
       if (forcefield) { forcefield.visible = true; forcefield.material.opacity = 1.0; }
     }
 
-    // Aktives Objekt bestimmen
     let activeObject = null;
     const distanceToCenterSq = ship.position.lengthSq();
     const circleCurrentRadius = pacingCircle.geometry.parameters.radius * pacingCircle.scale.x;
@@ -750,7 +697,6 @@ function animate() {
     planets.forEach(p => p.isFrozen = (activeObject === p.mesh));
     currentlyAnalyzedObject = activeObject;
 
-    // Analyze-Button anzeigen/ausblenden + Glow toggeln
     if (activeObject && !isAnalyzeButtonVisible) {
       analyzeButton.classList.add('ui-visible', 'btn-outline-glow');
       isAnalyzeButtonVisible = true;
@@ -760,16 +706,15 @@ function animate() {
     }
   }
 
-  // Normalisierte Kameralogik
   if (ship) {
     if (cameraFingerId === null && !isDraggingMouse) {
       cameraHolder.rotation.x = THREE.MathUtils.lerp(cameraHolder.rotation.x, 0, LERP_FACTOR);
       cameraPivot.rotation.y = THREE.MathUtils.lerp(cameraPivot.rotation.y, 0, LERP_FACTOR);
     }
-    if (cameraHolder.rotation.x > ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x - ROTATION_LIMIT) * SPRING_STIFFNESS;
-    else if (cameraHolder.rotation.x < -ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x + ROTATION_LIMIT) * SPRING_STIFFNESS;
-    if (cameraPivot.rotation.y > ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y - ROTATION_LIMIT) * SPRING_STIFFNESS;
-    else if (cameraPivot.rotation.y < -ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y + ROTATION_LIMIT) * SPRING_STIFFNESS;
+    if (cameraHolder.rotation.x > ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x - ROTATION_LIMIT) * 0.03;
+    else if (cameraHolder.rotation.x < -ROTATION_LIMIT) cameraVelocity.x -= (cameraHolder.rotation.x + ROTATION_LIMIT) * 0.03;
+    if (cameraPivot.rotation.y > ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y - ROTATION_LIMIT) * 0.03;
+    else if (cameraPivot.rotation.y < -ROTATION_LIMIT) cameraVelocity.y -= (cameraPivot.rotation.y + ROTATION_LIMIT) * 0.03;
     cameraHolder.rotation.x += cameraVelocity.x;
     cameraPivot.rotation.y += cameraVelocity.y;
   }
@@ -783,12 +728,6 @@ function animate() {
 
   accretionDisk.rotation.z += 0.005;
 
-  if (forcefield && forcefield.visible) {
-    forcefield.material.opacity -= 0.04;
-    if (forcefield.material.opacity <= 0) forcefield.visible = false;
-  }
-
-  // Refraction Capture
   lensingSphere.visible = false; blackHoleCore.visible = false; accretionDisk.visible = false;
   cubeCamera.update(renderer, mainScene);
   lensingSphere.visible = true; blackHoleCore.visible = true; accretionDisk.visible = true;
@@ -797,7 +736,7 @@ function animate() {
   labelRenderer.render(mainScene, camera);
 }
 
-// Resize
+/* Resize */
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -808,50 +747,47 @@ window.addEventListener('resize', () => {
   loadingCamera.updateProjectionMatrix();
 });
 
-/* ===== Maus & Touch Spotlight mit stärkerem Touch-Hover ===== */
+/* Pointer Glow */
 function addPointerGlow(el) {
   if (!el) return;
-  el.classList.add('pointer-glow'); // <- wichtig, damit ::before greift
-
-  const setPos = (clientX, clientY) => {
+  el.classList.add('pointer-glow');
+  const setPos = (x, y) => {
     const r = el.getBoundingClientRect();
-    el.style.setProperty('--glow-x', `${clientX - r.left}px`);
-    el.style.setProperty('--glow-y', `${clientY - r.top}px`);
+    el.style.setProperty('--glow-x', `${x - r.left}px`);
+    el.style.setProperty('--glow-y', `${y - r.top}px`);
   };
-
-  el.addEventListener('pointerenter', (e) => {
-    setPos(e.clientX, e.clientY);
-    el.classList.add('hover-active');
-    if (e.pointerType !== 'mouse') el.classList.add('touch-hover');
-  }, { passive: true });
-
-  el.addEventListener('pointermove', (e) => {
-    setPos(e.clientX, e.clientY);
-    if (e.pointerType !== 'mouse') el.classList.add('touch-hover', 'hover-active');
-  }, { passive: true });
-
-  el.addEventListener('pointerleave', () => {
-    el.classList.remove('hover-active', 'touch-hover');
-    el.style.setProperty('--glow-x', `-220px`);
-    el.style.setProperty('--glow-y', `-220px`);
-  }, { passive: true });
-
-  el.addEventListener('pointerup', () => { el.classList.remove('touch-hover'); }, { passive: true });
-  el.addEventListener('pointercancel', () => { el.classList.remove('hover-active', 'touch-hover'); }, { passive: true });
+  el.addEventListener('pointerenter', e => { setPos(e.clientX, e.clientY); el.classList.add('hover-active'); if (e.pointerType !== 'mouse') el.classList.add('touch-hover'); }, { passive: true });
+  el.addEventListener('pointermove',  e => { setPos(e.clientX, e.clientY); if (e.pointerType !== 'mouse') el.classList.add('touch-hover', 'hover-active'); }, { passive: true });
+  el.addEventListener('pointerleave', () => { el.classList.remove('hover-active', 'touch-hover'); el.style.setProperty('--glow-x', `-220px`); el.style.setProperty('--glow-y', `-220px`); }, { passive: true });
+  el.addEventListener('pointerup',    () => el.classList.remove('touch-hover'), { passive: true });
+  el.addEventListener('pointercancel',() => el.classList.remove('hover-active', 'touch-hover'), { passive: true });
 }
 [analyzeButton, muteButton, motionToggleButton, closeAnalysisButton].forEach(addPointerGlow);
 
-/* ===== Musik stoppen, wenn Tab verlassen ===== */
+/* --- Tab verlassen: Audio stoppen + hartes Reload beim Zurückkehren --- */
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && audio && !audio.paused) {
-    try { audio.pause(); } catch {}
+  if (document.hidden) {
+    // Tab verlassen
+    if (audio && !audio.paused) { try { audio.pause(); } catch {} }
+    // Markiere, dass wir die Seite verlassen haben
+    try { sessionStorage.setItem('leftPage', '1'); } catch {}
+  } else {
+    // Tab wieder sichtbar -> wenn zuvor verlassen, dann hart neu laden
+    try {
+      if (sessionStorage.getItem('leftPage') === '1') {
+        sessionStorage.removeItem('leftPage');
+        window.location.reload();
+      }
+    } catch {}
   }
 });
 
-/* ===== Seite bei Rückkehr aus bfcache refreshen ===== */
+// bfcache-Fall (Safari/Firefox Zurück/Vor) -> immer neu laden
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) {
-    // Neu laden, um State zu resetten (Safari/Firefox bfcache)
-    window.location.reload();
-  }
+  if (e.persisted) window.location.reload();
+});
+
+// Für Sicherheit auch beim pagehide markieren
+window.addEventListener('pagehide', () => {
+  try { sessionStorage.setItem('leftPage', '1'); } catch {}
 });
