@@ -249,27 +249,9 @@ planetData.forEach(createPlanet);
 const GLOBAL_ANGULAR_SPEED = 0.02;
 
 /* --- Ship & Kamera --- */
-let ship; let forcefield;
+let ship; // Forcefield vollständig entfernt
 const cameraPivot = new THREE.Object3D();
 const cameraHolder = new THREE.Object3D();
-
-function createForcefield(radius) {
-  const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 3;
-  for (let i = 0; i < 8; i++) {
-    const x = i * 18; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 128); ctx.stroke();
-    const y = i * 18; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(128, y); ctx.stroke();
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  const geometry = new THREE.SphereGeometry(radius, 32, 32);
-  const material = new THREE.MeshBasicMaterial({
-    map: texture, transparent: true, blending: THREE.AdditiveBlending, opacity: 0, side: THREE.DoubleSide
-  });
-  const ff = new THREE.Mesh(geometry, material);
-  ff.visible = false;
-  return ff;
-}
 
 /* --- Analyse-Inhalte --- */
 const OBJECT_CONTENT = {
@@ -445,8 +427,6 @@ loader.load(
     shipLoaded.position.set(0, 0, 30);
     ship = shipLoaded;
 
-    forcefield = createForcefield(5.1);
-    ship.add(forcefield);
     ship.add(cameraPivot); cameraPivot.add(cameraHolder); cameraHolder.add(camera);
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
@@ -463,7 +443,6 @@ loader.load(
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
 
-      // Motion-Button einblendbar
       motionToggleButton.classList.add('ui-visible');
     }, { once: true });
   },
@@ -675,13 +654,14 @@ function animate() {
     ship.translateZ(finalForward);
     ship.rotateY(finalTurn);
 
+    // Kollisionsschutz zum Zentrum (ohne Forcefield-Rendering)
     const blackHoleRadius = blackHoleCore.geometry.parameters.radius;
     const collisionThreshold = shipRadius + blackHoleRadius;
     if (ship.position.distanceTo(blackHoleCore.position) < collisionThreshold) {
       ship.position.copy(previousPosition);
-      if (forcefield) { forcefield.visible = true; forcefield.material.opacity = 1.0; }
     }
 
+    // Aktives Objekt bestimmen
     let activeObject = null;
     const distanceToCenterSq = ship.position.lengthSq();
     const circleCurrentRadius = pacingCircle.geometry.parameters.radius * pacingCircle.scale.x;
@@ -728,6 +708,7 @@ function animate() {
 
   accretionDisk.rotation.z += 0.005;
 
+  // Refraction Capture
   lensingSphere.visible = false; blackHoleCore.visible = false; accretionDisk.visible = false;
   cubeCamera.update(renderer, mainScene);
   lensingSphere.visible = true; blackHoleCore.visible = true; accretionDisk.visible = true;
@@ -767,12 +748,9 @@ function addPointerGlow(el) {
 /* --- Tab verlassen: Audio stoppen + hartes Reload beim Zurückkehren --- */
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    // Tab verlassen
     if (audio && !audio.paused) { try { audio.pause(); } catch {} }
-    // Markiere, dass wir die Seite verlassen haben
     try { sessionStorage.setItem('leftPage', '1'); } catch {}
   } else {
-    // Tab wieder sichtbar -> wenn zuvor verlassen, dann hart neu laden
     try {
       if (sessionStorage.getItem('leftPage') === '1') {
         sessionStorage.removeItem('leftPage');
@@ -782,12 +760,12 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// bfcache-Fall (Safari/Firefox Zurück/Vor) -> immer neu laden
+// bfcache-Fall -> neu laden
 window.addEventListener('pageshow', (e) => {
   if (e.persisted) window.location.reload();
 });
 
-// Für Sicherheit auch beim pagehide markieren
+// sicherheitshalber auch bei pagehide markieren
 window.addEventListener('pagehide', () => {
   try { sessionStorage.setItem('leftPage', '1'); } catch {}
 });
