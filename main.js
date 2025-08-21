@@ -42,21 +42,13 @@ const joystickZone = document.getElementById('joystick-zone');
 const bottomBar = document.getElementById('bottom-bar');
 const muteButton = document.getElementById('mute-button');
 const analyzeButton = document.getElementById('analyze-button');
+const motionToggleBtn = document.getElementById('motion-toggle-button');
 const audio = document.getElementById('media-player');
 
 const analysisWindow = document.getElementById('analysis-window');
 const analysisTitle = document.getElementById('analysis-title');
 const analysisTextContent = document.getElementById('analysis-text-content');
 const closeAnalysisButton = document.getElementById('close-analysis-button');
-
-// Quick Warp UI
-const quickWarpBtn = document.getElementById('quick-warp-btn');
-const quickWarpOverlay = document.getElementById('quick-warp-overlay');
-const warpList = document.getElementById('warp-list');
-const warpHereBtn = document.getElementById('warp-here');
-const warpCloseBtn = document.getElementById('warp-close');
-const warpFlash = document.getElementById('warp-flash');
-let chosenWarpTargetId = null;
 
 // ===== HYPERSPACE-LOADING =====
 const loadingScene = new THREE.Scene();
@@ -106,24 +98,26 @@ function createGalaxy() {
     const i3 = i * 3;
     const radius = Math.random() * parameters.radius;
     const spinAngle = radius * parameters.spin;
-    const branchAngle = (i % parameters.arms) / parameters.arms * Math.PI * 2;
+    theLoop: {
+      const branchAngle = (i % parameters.arms) / parameters.arms * Math.PI * 2;
 
-    const rnd = parameters.randomness;
-    const pow = parameters.randomnessPower;
+      const rnd = parameters.randomness;
+      const pow = parameters.randomnessPower;
 
-    const randomX = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
-    const randomY = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius * 0.1;
-    const randomZ = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
+      const randomX = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
+      const randomY = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius * 0.1;
+      const randomZ = Math.pow(Math.random(), pow) * (Math.random() < 0.5 ? 1 : -1) * rnd * radius;
 
-    positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
-    positions[i3 + 1] = randomY;
-    positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+      positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+      positions[i3 + 1] = randomY;
+      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
-    const mixedColor = colorInside.clone();
-    mixedColor.lerp(colorOutside, radius / parameters.radius);
-    colors[i3] = mixedColor.r;
-    colors[i3 + 1] = mixedColor.g;
-    colors[i3 + 2] = mixedColor.b;
+      const mixedColor = colorInside.clone();
+      mixedColor.lerp(colorOutside, radius / parameters.radius);
+      colors[i3] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
+    }
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -233,16 +227,16 @@ const planetData = [
   { name: '3D-Printing (The ultimate engineering-tool)', radius: 1.6, orbit: 125, speed: 0.006 }
 ];
 
-function createPlanetTexture(color) {
+function createPlanetTexture(hue) {
   const canvas = document.createElement('canvas');
   canvas.width = 128; canvas.height = 128;
   const context = canvas.getContext('2d');
-  context.fillStyle = `hsl(${color}, 70%, 50%)`;
+  context.fillStyle = `hsl(${hue}, 70%, 50%)`;
   context.fillRect(0, 0, 128, 128);
   for (let i = 0; i < 3000; i++) {
     const x = Math.random() * 128; const y = Math.random() * 128; const r = Math.random() * 1.5;
     context.beginPath(); context.arc(x, y, r, 0, Math.PI * 2);
-    context.fillStyle = `hsla(${color + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
+    context.fillStyle = `hsla(${hue + Math.random() * 40 - 20}, 70%, ${Math.random() * 50 + 25}%, 0.5)`;
     context.fill();
   }
   return new THREE.CanvasTexture(canvas);
@@ -355,16 +349,12 @@ SURGE is my 8th-grade capstone project — an autonomous, electrically powered m
   },
   'OpenImageLabel (A website to label images for professional photography)': {
     title: 'OpenImageLabel',
-    html: `
-<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>
-`,
+    html: `<p>OpenImageLabel turns EXIF data into clean overlays you can tweak and batch-export — fast labeling for photographers across desktop and mobile.</p>`,
     images: []
   },
   'Project Cablerack (A smarter way to cable-manage)': {
     title: 'Project Cablerack',
-    html: `
-<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>
-`,
+    html: `<p>A custom sheet-metal rack for five laptops, one-cable desk setup, HDMI switching, ARGB cooling, and Apple Home integration.</p>`,
     images: ['Rack 2.png']
   },
   'Socials/Other Sites': {
@@ -383,71 +373,48 @@ SURGE is my 8th-grade capstone project — an autonomous, electrically powered m
   },
   'HA-Lightswitch (Making analog Lightswitches smart)': {
     title: 'HA-Lightswitch',
-    html: `
-<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
-Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>
-`,
+    html: `<p>3D-printed, servo-driven add-on to flip analog wall switches without modification. Controlled via Home Assistant + MQTT on an Arduino.<br>
+Code & files: <a href="https://github.com/makerLab314/OpenLightswitch-HA" target="_blank" rel="noopener">github.com/makerLab314/OpenLightswitch-HA</a></p>`,
     images: []
   },
   'My Creative Work (Filming, flying, photography)': {
     title: 'Creative Work',
-    html: `
-<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>
-`,
+    html: `<p>Drone storytelling with a DJI Mini 2 — cinematic shots that make people want to watch. Projects for clients and personal explorations.</p>`,
     images: []
   },
   '3D-Printing (The ultimate engineering-tool)': {
     title: '3D-Printing',
-    html: `
-<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>
-`,
+    html: `<p>From kindergarten rocket ideas to CAD and a home 3D-printer — additive manufacturing became my go-to tool to turn concepts into reality.</p>`,
     images: []
   }
 };
 // ===== ENDE INHALTE =====
 
-// States
-let appState = 'loading';
-let isAnalyzeButtonVisible = false;
-let currentlyAnalyzedObject = null;
-
-createHyperspaceEffect();
-animate();
-
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-loader.setDRACOLoader(dracoLoader);
-
-// Neuer Repo-/Pages-Pfad für die GLB:
-const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
-
-// ======= GYRO-STEERING VARS =======
-let gyroControlActive = false;
-const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt (beim ersten Event)
-const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
-const GYRO_FORWARD_FACTOR = 0.015; // ~0.3 bei ~20° Kipp (vor/zurück)
-const GYRO_TURN_FACTOR    = 0.003; // ~0.06 bei ~20° Kipp (links/rechts)
-const GYRO_MAX_FORWARD    = 0.35;  // clamp für Vortrieb
-const GYRO_MAX_TURN       = 0.06;  // clamp für Rotation
-const GYRO_SMOOTHING      = 0.12;  // LERP-Faktor
-
+// Gyro-Helpers
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
 
+// ======= GYRO-STEERING VARS =======
+let gyroControlActive = false;               // default OFF
+const gyroBaseline = { beta: null, gamma: null }; // Nullpunkt
+const gyroInput = { forward: 0, turn: 0 };        // wird pro Frame addiert
+const GYRO_FORWARD_FACTOR = 0.015;
+const GYRO_TURN_FACTOR    = 0.003;
+const GYRO_MAX_FORWARD    = 0.35;
+const GYRO_MAX_TURN       = 0.06;
+const GYRO_SMOOTHING      = 0.12;
+
 function onDeviceOrientation(e) {
-  // e.beta: -180..180 (vor/zurück), e.gamma: -90..90 (links/rechts)
   const beta = (typeof e.beta === 'number') ? e.beta : 0;
   const gamma = (typeof e.gamma === 'number') ? e.gamma : 0;
 
-  // Nullpunkt beim ersten validen Event setzen
   if (gyroBaseline.beta === null || gyroBaseline.gamma === null) {
     gyroBaseline.beta = beta;
     gyroBaseline.gamma = gamma;
   }
 
-  const dBeta = beta - gyroBaseline.beta;   // vor/zurück
-  const dGamma = gamma - gyroBaseline.gamma; // links/rechts
+  const dBeta = beta - gyroBaseline.beta;     // vor/zurück
+  const dGamma = gamma - gyroBaseline.gamma;  // links/rechts
 
   const targetForward = clamp(-dBeta * GYRO_FORWARD_FACTOR, -GYRO_MAX_FORWARD, GYRO_MAX_FORWARD);
   const targetTurn    = clamp(-dGamma * GYRO_TURN_FACTOR,  -GYRO_MAX_TURN,    GYRO_MAX_TURN);
@@ -459,7 +426,6 @@ function onDeviceOrientation(e) {
 async function enableGyro() {
   if (gyroControlActive) return;
   try {
-    // iOS (ab 13+) braucht explizite Erlaubnis nach User-Geste
     if (typeof DeviceOrientationEvent !== 'undefined'
         && typeof DeviceOrientationEvent.requestPermission === 'function') {
       const state = await DeviceOrientationEvent.requestPermission();
@@ -468,12 +434,35 @@ async function enableGyro() {
     window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
     gyroControlActive = true;
   } catch (err) {
-    // still graceful if something fails
     console.warn('Gyro not available or permission denied:', err);
   }
 }
+function disableGyro() {
+  if (!gyroControlActive) return;
+  window.removeEventListener('deviceorientation', onDeviceOrientation);
+  gyroControlActive = false;
+  gyroBaseline.beta = null;
+  gyroBaseline.gamma = null;
+  gyroInput.forward = 0;
+  gyroInput.turn = 0;
+}
+function setMotionUI(isOn) {
+  motionToggleBtn.setAttribute('aria-pressed', String(isOn));
+  motionToggleBtn.classList.toggle('active', isOn);
+}
 
 // ======= LOAD MODEL =======
+const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+loader.setDRACOLoader(dracoLoader);
+
+// Repo-/Pages-Pfad für das GLB:
+const modelURL = 'https://professorengineergit.github.io/Bahrian_Novotny_My_Universe/enterprise-V2.0.glb';
+
+createHyperspaceEffect();
+animate();
+
 loader.load(
   modelURL,
   (gltf) => {
@@ -496,7 +485,7 @@ loader.load(
     camera.position.set(0, 4, -15); camera.lookAt(cameraHolder.position);
     cameraPivot.rotation.y = Math.PI;
 
-    // Beim Tap: Audio starten, Kamera seitlich "loslassen", Gyro aktivieren
+    // Beim Tap: Audio starten, Kamera seitlich "loslassen"
     loadingScreen.addEventListener('click', async () => {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.style.display = 'none', 500);
@@ -505,16 +494,15 @@ loader.load(
       cameraPivot.rotation.y = Math.PI / 2; // 90°
       appState = 'playing';
 
-      // Gyro versuchen zu aktivieren (User-Geste vorhanden)
-      if (window.isSecureContext) { enableGyro(); }
+      // Gyro NICHT automatisch – nur per Button
+      // if (window.isSecureContext) { enableGyro(); }
 
       infoElement.classList.add('ui-visible');
       bottomBar.classList.add('ui-visible');
       joystickZone.classList.add('ui-visible');
-      setTimeout(() => { quickWarpBtn.classList.remove('hidden'); }, 1000);
+      // Motion-Toggle anzeigen
+      motionToggleBtn.classList.add('ui-visible');
     }, { once: true });
-
-    buildWarpList();
   },
   (xhr) => {
     if (xhr.lengthComputable) {
@@ -659,86 +647,46 @@ analyzeButton.addEventListener('click', () => {
   analyzeButton.classList.remove('btn-outline-glow');
 
   analysisWindow.classList.add('visible');
+  analysisWindow.setAttribute('aria-hidden', 'false');
   appState = 'paused';
 });
 closeAnalysisButton.addEventListener('click', () => {
   analysisWindow.classList.remove('visible');
+  analysisWindow.setAttribute('aria-hidden', 'true');
   appState = 'playing';
 });
 
-// ===== Quick Warp =====
-quickWarpBtn.addEventListener('click', () => {
-  quickWarpOverlay.classList.add('visible');
-  quickWarpOverlay.setAttribute('aria-hidden', 'false');
-});
-warpCloseBtn.addEventListener('click', closeWarpOverlay);
-
-function closeWarpOverlay() {
-  quickWarpOverlay.classList.remove('visible');
-  quickWarpOverlay.setAttribute('aria-hidden', 'true');
-  chosenWarpTargetId = null;
-  warpHereBtn.disabled = true;
-  [...warpList.children].forEach(li => li.classList.remove('active'));
-}
-
-function buildWarpList() {
-  warpList.innerHTML = '';
-  const entries = [
-    { id: 'blackhole', name: blackHoleCore.name },
-    ...planets.map((p, i) => ({ id: 'planet-' + i, name: p.mesh.name }))
-  ];
-  for (const entry of entries) {
-    const li = document.createElement('li');
-    li.textContent = entry.name;
-    li.dataset.targetId = entry.id;
-    li.addEventListener('click', () => {
-      [...warpList.children].forEach(x => x.classList.remove('active'));
-      li.classList.add('active');
-      chosenWarpTargetId = entry.id;
-      warpHereBtn.disabled = false;
-    });
-    warpList.appendChild(li);
-  }
-}
-
-warpHereBtn.addEventListener('click', () => {
-  if (!chosenWarpTargetId || !ship) return;
-  if (warpFlash) {
-    warpFlash.classList.add('active');
-    setTimeout(() => warpFlash.classList.remove('active'), 180);
-  }
-
-  appState = 'paused';
-  setTimeout(() => {
-    performWarp(chosenWarpTargetId);
-    appState = 'playing';
-  }, 160);
-
-  closeWarpOverlay();
-});
-
-function performWarp(targetId) {
-  if (targetId === 'blackhole') {
-    const target = new THREE.Vector3(0, 0, 0);
-    ship.position.copy(target.clone().add(new THREE.Vector3(0, 0, 30)));
-    ship.lookAt(target);
+// ===== Motion-Toggle (Gyro) =====
+motionToggleBtn.addEventListener('click', async () => {
+  if (gyroControlActive) {
+    disableGyro();
+    setMotionUI(false);
   } else {
-    const idx = parseInt(targetId.split('-')[1], 10);
-    const p = planets[idx];
-    const worldPos = new THREE.Vector3();
-    p.mesh.getWorldPosition(worldPos);
-
-    const dir = new THREE.Vector3().subVectors(ship.position, worldPos).normalize();
-    if (dir.lengthSq() === 0) dir.set(0, 0, 1);
-    ship.position.copy(worldPos.clone().add(dir.multiplyScalar(12 + p.mesh.geometry.parameters.radius)));
-    ship.lookAt(worldPos);
+    await enableGyro();               // versucht Permission zu holen
+    setMotionUI(gyroControlActive);   // nur „on“, wenn Permission geklappt hat
   }
-  cameraPivot.rotation.y = 0;
-}
+});
+
+// ===== Audio beim Tab-Verlassen pausieren =====
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' && audio && !audio.paused) {
+    audio.pause();
+  }
+});
+
+// ===== Seite aus BFCache zurück? → hart neu laden =====
+window.addEventListener('pageshow', (e) => {
+  const nav = performance.getEntriesByType?.('navigation')?.[0];
+  const isBFCache = e.persisted || (nav && nav.type === 'back_forward');
+  if (isBFCache) window.location.reload();
+});
 
 // ===== Animation =====
 const clock = new THREE.Clock();
 const worldPosition = new THREE.Vector3();
+let appState = 'loading';
+let isAnalyzeButtonVisible = false;
+let currentlyAnalyzedObject = null;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -865,6 +813,7 @@ window.addEventListener('resize', () => {
 /* ===== Maus & Touch Spotlight mit stärkerem Touch-Hover ===== */
 function addPointerGlow(el) {
   if (!el) return;
+  el.classList.add('pointer-glow');
 
   const setPos = (clientX, clientY) => {
     const r = el.getBoundingClientRect();
@@ -898,4 +847,4 @@ function addPointerGlow(el) {
   }, { passive: true });
 }
 
-[analyzeButton, muteButton, quickWarpBtn, warpCloseBtn, warpHereBtn, closeAnalysisButton].forEach(addPointerGlow);
+[analyzeButton, muteButton, closeAnalysisButton, motionToggleBtn].forEach(addPointerGlow);
