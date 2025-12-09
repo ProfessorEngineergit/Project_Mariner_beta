@@ -20,6 +20,19 @@
 </head>
 <body>
   <div id="info">STEUERUNG: JOYSTICK (LINKS) | KAMERA: 1-FINGER-WISCHEN | ZOOM: 2-FINGER-PINCH</div>
+  
+  <!-- Varian Drive Info Button -->
+  <button id="varian-drive-button" class="top-button" title="Varian Drive Info" aria-label="Varian Drive Info">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="currentColor"/>
+    </svg>
+  </button>
+  
+  <!-- Tooltip with typewriter effect -->
+  <div id="varian-drive-tooltip" class="liquid-glass typewriter-tooltip" aria-hidden="true">
+    <div id="typewriter-text"></div>
+  </div>
+  
   <div id="joystick-zone"></div>
 
   <div id="bottom-bar" class="liquid-glass">
