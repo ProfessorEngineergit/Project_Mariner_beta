@@ -41,8 +41,8 @@ const analyzeButton = document.getElementById('analyze-button');
 const motionToggleButton = document.getElementById('motion-toggle-button');
 const audio = document.getElementById('media-player');
 
-const varianDriveButton = document.getElementById('varian-drive-button');
-const varianDriveTooltip = document.getElementById('varian-drive-tooltip');
+const bahrianDriveButton = document.getElementById('bahrian-drive-button');
+const bahrianDriveTooltip = document.getElementById('bahrian-drive-tooltip');
 const typewriterText = document.getElementById('typewriter-text');
 
 const analysisWindow = document.getElementById('analysis-window');
@@ -448,7 +448,7 @@ loader.load(
       joystickZone.classList.add('ui-visible');
 
       motionToggleButton.classList.add('ui-visible');
-      varianDriveButton.classList.add('ui-visible');
+      bahrianDriveButton.classList.add('ui-visible');
     }, { once: true });
   },
   (xhr) => {
@@ -617,8 +617,8 @@ motionToggleButton.addEventListener('click', async () => {
   }
 });
 
-/* --- Varian Drive Tooltip --- */
-const VARIAN_DRIVE_TEXT = "Willkommen bei Varian Drive – Ihrem Portal zu den genetischen Bauplänen künstlicher Intelligenz. Hier werden die fundamentalen Strukturen und evolutionären Muster der KI-Entwicklung erforscht und dokumentiert. Jede Information ist ein genetischer Code, der die Zukunft intelligenter Systeme formt.";
+/* --- Bahrian Drive Tooltip --- */
+const BAHRIAN_DRIVE_TEXT = "Willkommen bei Bahrian Drive – meinem persönlichen Cloud-Speicher. Hier werden Dateien, Projekte und Dokumente sicher gespeichert und organisiert. Klicken Sie auf das Symbol, um zur Nextcloud zu gelangen.";
 let isTyping = false;
 let typewriterTimeout = null;
 let hideTooltipTimeout = null;
@@ -656,31 +656,31 @@ function stopTypewriter() {
   isTyping = false;
 }
 
-varianDriveButton.addEventListener('mouseenter', () => {
+bahrianDriveButton.addEventListener('mouseenter', () => {
   stopTypewriter();
-  varianDriveTooltip.classList.add('visible');
-  typewriterEffect(VARIAN_DRIVE_TEXT, typewriterText, 25);
+  bahrianDriveTooltip.classList.add('visible');
+  typewriterEffect(BAHRIAN_DRIVE_TEXT, typewriterText, 25);
 });
 
-varianDriveButton.addEventListener('mouseleave', () => {
+bahrianDriveButton.addEventListener('mouseleave', () => {
   hideTooltipTimeout = setTimeout(() => {
     stopTypewriter();
-    varianDriveTooltip.classList.remove('visible');
+    bahrianDriveTooltip.classList.remove('visible');
     typewriterText.textContent = '';
   }, 300);
 });
 
-varianDriveTooltip.addEventListener('mouseenter', () => {
+bahrianDriveTooltip.addEventListener('mouseenter', () => {
   if (hideTooltipTimeout) {
     clearTimeout(hideTooltipTimeout);
     hideTooltipTimeout = null;
   }
 });
 
-varianDriveTooltip.addEventListener('mouseleave', () => {
+bahrianDriveTooltip.addEventListener('mouseleave', () => {
   hideTooltipTimeout = setTimeout(() => {
     stopTypewriter();
-    varianDriveTooltip.classList.remove('visible');
+    bahrianDriveTooltip.classList.remove('visible');
     typewriterText.textContent = '';
   }, 300);
 });
@@ -816,7 +816,7 @@ function addPointerGlow(el) {
   el.addEventListener('pointerup',    () => el.classList.remove('touch-hover'), { passive: true });
   el.addEventListener('pointercancel',() => el.classList.remove('hover-active', 'touch-hover'), { passive: true });
 }
-[analyzeButton, muteButton, motionToggleButton, closeAnalysisButton, varianDriveButton].forEach(addPointerGlow);
+[analyzeButton, muteButton, motionToggleButton, closeAnalysisButton, bahrianDriveButton].forEach(addPointerGlow);
 
 /* --- Tab verlassen: Audio stoppen + hartes Reload beim Zurückkehren --- */
 document.addEventListener('visibilitychange', () => {
