@@ -628,10 +628,12 @@ function typewriterEffect(text, element, speed = 20) {
   isTyping = true;
   element.textContent = '';
   let index = 0;
+  let displayText = '';
   
   function typeNextChar() {
     if (index < text.length) {
-      element.textContent += text.charAt(index);
+      displayText += text.charAt(index);
+      element.textContent = displayText;
       index++;
       typewriterTimeout = setTimeout(typeNextChar, speed);
     } else {
