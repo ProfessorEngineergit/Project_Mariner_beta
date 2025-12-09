@@ -41,6 +41,10 @@ const analyzeButton = document.getElementById('analyze-button');
 const motionToggleButton = document.getElementById('motion-toggle-button');
 const audio = document.getElementById('media-player');
 
+const varianDriveButton = document.getElementById('varian-drive-button');
+const varianDriveTooltip = document.getElementById('varian-drive-tooltip');
+const typewriterText = document.getElementById('typewriter-text');
+
 const analysisWindow = document.getElementById('analysis-window');
 const analysisTitle = document.getElementById('analysis-title');
 const analysisTextContent = document.getElementById('analysis-text-content');
@@ -444,6 +448,7 @@ loader.load(
       joystickZone.classList.add('ui-visible');
 
       motionToggleButton.classList.add('ui-visible');
+      varianDriveButton.classList.add('ui-visible');
     }, { once: true });
   },
   (xhr) => {
@@ -612,6 +617,72 @@ motionToggleButton.addEventListener('click', async () => {
   }
 });
 
+/* --- Varian Drive Tooltip --- */
+const VARIAN_DRIVE_TEXT = "Willkommen bei Varian Drive – Ihrem Portal zu den genetischen Bauplänen künstlicher Intelligenz. Hier werden die fundamentalen Strukturen und evolutionären Muster der KI-Entwicklung erforscht und dokumentiert. Jede Information ist ein genetischer Code, der die Zukunft intelligenter Systeme formt.";
+let isTyping = false;
+let typewriterTimeout = null;
+let hideTooltipTimeout = null;
+
+function typewriterEffect(text, element, speed = 20) {
+  if (isTyping) return;
+  isTyping = true;
+  element.textContent = '';
+  let index = 0;
+  
+  function typeNextChar() {
+    if (index < text.length) {
+      element.textContent += text.charAt(index);
+      index++;
+      typewriterTimeout = setTimeout(typeNextChar, speed);
+    } else {
+      isTyping = false;
+    }
+  }
+  
+  typeNextChar();
+}
+
+function stopTypewriter() {
+  if (typewriterTimeout) {
+    clearTimeout(typewriterTimeout);
+    typewriterTimeout = null;
+  }
+  if (hideTooltipTimeout) {
+    clearTimeout(hideTooltipTimeout);
+    hideTooltipTimeout = null;
+  }
+  isTyping = false;
+}
+
+varianDriveButton.addEventListener('mouseenter', () => {
+  stopTypewriter();
+  varianDriveTooltip.classList.add('visible');
+  typewriterEffect(VARIAN_DRIVE_TEXT, typewriterText, 25);
+});
+
+varianDriveButton.addEventListener('mouseleave', () => {
+  hideTooltipTimeout = setTimeout(() => {
+    stopTypewriter();
+    varianDriveTooltip.classList.remove('visible');
+    typewriterText.textContent = '';
+  }, 300);
+});
+
+varianDriveTooltip.addEventListener('mouseenter', () => {
+  if (hideTooltipTimeout) {
+    clearTimeout(hideTooltipTimeout);
+    hideTooltipTimeout = null;
+  }
+});
+
+varianDriveTooltip.addEventListener('mouseleave', () => {
+  hideTooltipTimeout = setTimeout(() => {
+    stopTypewriter();
+    varianDriveTooltip.classList.remove('visible');
+    typewriterText.textContent = '';
+  }, 300);
+});
+
 /* --- Animation --- */
 const clock = new THREE.Clock();
 const worldPosition = new THREE.Vector3();
@@ -743,7 +814,7 @@ function addPointerGlow(el) {
   el.addEventListener('pointerup',    () => el.classList.remove('touch-hover'), { passive: true });
   el.addEventListener('pointercancel',() => el.classList.remove('hover-active', 'touch-hover'), { passive: true });
 }
-[analyzeButton, muteButton, motionToggleButton, closeAnalysisButton].forEach(addPointerGlow);
+[analyzeButton, muteButton, motionToggleButton, closeAnalysisButton, varianDriveButton].forEach(addPointerGlow);
 
 /* --- Tab verlassen: Audio stoppen + hartes Reload beim Zurückkehren --- */
 document.addEventListener('visibilitychange', () => {
