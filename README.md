@@ -4,7 +4,10 @@ Welcome to the **Beta Edition** of *My Universe* — a living, experimental spac
 
 This Beta is open to everyone — developers, designers, testers, or anyone with an idea to contribute. I am happy for your ideas and code improvement, that I will try to implement as soon as possible.
 
-From experimental navigation systems to new planet interactions, enhanced animations, and prototype content modules — this is the playground where the future of *My Universe* is forged. It’s a place to break things, fix them, and make them better.
+This branch is an experimental version of the portfolio. Navigation, planet interactions and visual effects may change before they reach the main site.
 
-If you’re ready to explore, test, and help build the next chapter of *My Universe*, then welcome aboard.
-This isn’t just my universe anymore — it’s ours.
+Feedback should identify the browser, device and steps needed to reproduce a problem.
+
+## Development and AI assistance
+
+Small learning or experimental project developed with AI assistance. The default-branch history includes contributions explicitly attributed to GitHub Copilot ([example](https://github.com/ProfessorEngineergit/Project_Mariner_beta/commit/b02835a6b490fee1b407521f99e555ae8eeb6760)). This documents AI involvement in those contributions; it does not establish the origin of every line or independent validation. Existing author, co-author and session records are retained.
